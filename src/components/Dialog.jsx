@@ -5,6 +5,7 @@ import { SALESMEN, AZ_CITIES, SOURCES } from '../data.js';
 import { formatCurrency } from '../formHelpers.js';
 import {
     getClass,
+    getRegion,
     getStatus,
     getSource,
     buildAddressText,
@@ -78,7 +79,7 @@ const Dialog = ({ formData }) => {
     const estimateDetailsData = {
         class: required(getClass(salesmanObj, cityObj)),
         contract_date: required(formattedFields.contract_date),
-        salesman: required(formData.salesman),
+        salesman: required(salesmanObj && salesmanObj.value),
         source: required(getSource(sourceObj)),
         price: required(formattedFields.price_number)
     };
@@ -91,7 +92,7 @@ const Dialog = ({ formData }) => {
     }
 
     const excelRowData = {
-        Region: required(salesmanObj && salesmanObj.region),
+        Region: required(getRegion(salesmanObj)),
         Date: required(formattedFields.contract_date),
         Salesman: required(formData.salesman),
         Customer: required(formData.name),

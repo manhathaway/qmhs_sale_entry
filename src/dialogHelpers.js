@@ -2,11 +2,20 @@ const getClass = (salesmanObj, cityObj) => {
     if (salesmanObj) {
         if (salesmanObj.region === 'CA') return salesmanObj.subregion;
         if (cityObj) return cityObj.class;
-        return 'N/A';
+        return null;
     } else {
         return null;
     }
 };
+
+const getRegion = (salesmanObj) => {
+    if (salesmanObj) {
+        if (salesmanObj.region === 'AZ') return salesmanObj.region;
+        return salesmanObj.subregion;
+    } else {
+        return null;
+    }
+}
 
 const getStatus = (salesmanObj) => {
     if (salesmanObj) {
@@ -80,15 +89,21 @@ const buildNoteText = (data) => {
 
     text += `${data.contract_date} - ${data.price} - ${data.salesman}:\n`;
     text += `Job entered, folder made.\n`;
-    if ((/^(?:1[0-2]|[1-9]):[0-5]\d(?:AM|PM)$/i).test(data.email_date)) {
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
-        const today = new Date();
-        const formattedDate = `${days[today.getDay()]}, ${months[today.getMonth()]} ${today.getDate()}`;
+    if (data.email_date !== '[MISSING]') {
+        text += `Sales email received: `;
+        if ((/^(?:1[0-2]|[1-9]):[0-5]\d(?:AM|PM)$/i).test(data.email_date.replace(' ', ''))) {
 
-        text += `${formattedDate}, ${data.email_date}`;
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+            const today = new Date();
+            const formattedDate = `${days[today.getDay()]}, ${months[today.getMonth()]} ${today.getDate()}`;
+
+            text += `${formattedDate}, ${data.email_date}`;
+        } else {
+            text += data.email_date;
+        }
     } else {
-        text += data.email_date;
+        text += 'Sales email not received/entered beforehand.';
     }
 
     return text;
@@ -96,6 +111,7 @@ const buildNoteText = (data) => {
 
 export {
     getClass,
+    getRegion,
     getStatus,
     getSource,
     buildAddressText,

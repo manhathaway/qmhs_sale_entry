@@ -1,6 +1,6 @@
 const FORM_SCHEMA = [
     { id: 'name', label: 'Name', type: 'text' },
-
+    { id: 'email_date', label: 'Email Date', type: 'text' },
     { id: 'new_customer', label: 'New Customer?', type: 'checkbox' },
     {
         id: 'address',
@@ -8,9 +8,7 @@ const FORM_SCHEMA = [
         type: 'textarea',
         enabledWhen: (form) => form.new_customer
     },
-
     { id: 'salesman', label: 'Salesman', type: 'select', data: 'salesman' },
-
     {
         id: 'city',
         label: 'City',
@@ -19,21 +17,14 @@ const FORM_SCHEMA = [
         enabledWhen: (form, ctx) =>
             ctx.selectedSalesman?.region === 'AZ'
     },
-
-    { id: 'email_date', label: 'Email Date', type: 'text' },
     { id: 'contract_date', label: 'Contract Date', type: 'date' },
-
     { id: 'sources', label: 'Source', type: 'select', data: 'sources' },
-
     { id: 'job_name', label: 'Job Name', type: 'text' },
     { id: 'job_description', label: 'Job Description', type: 'textarea' },
-
     { id: 'price', label: 'Price', type: 'text', currency: true },
     { id: 'deposit', label: 'Deposit', type: 'text', currency: true },
     { id: 'depositType', label: 'Deposit Type', type: 'select', data: 'depositType' },
-
     { id: 'financed', label: 'Financed?', type: 'checkbox' },
-
     {
         id: 'amount_financed',
         label: 'Amount Financed',
@@ -47,7 +38,17 @@ const FORM_SCHEMA = [
         type: 'text',
         enabledWhen: (form) => form.financed
     },
-
+    {
+        id: 'discounts',
+        label: 'Discounts?',
+        type: 'repeatable',
+        toggle: 'discounts',
+        includeInitial: true,
+        fields: [
+            { key: 'name', placeholder: 'Discount Name' },
+            { key: 'price', placeholder: 'Discount Price', currency: true }
+        ]
+    },
     {
         id: 'progress_payments',
         label: 'Progress Payments?',
@@ -57,18 +58,6 @@ const FORM_SCHEMA = [
             { key: 'name', placeholder: 'Payment Name' },
             { key: 'price', placeholder: 'Payment Price', currency: true }
         ]
-    },
-
-    {
-        id: 'discounts',
-        label: 'Discounts',
-        type: 'repeatable',
-        toggle: 'discounts',
-        includeInitial: true,
-        fields: [
-            { key: 'name', placeholder: 'Discount Name' },
-            { key: 'price', placeholder: 'Discount Price', currency: true }
-        ]
     }
 ];
 
@@ -76,13 +65,13 @@ const SALESMEN = {
     name: 'salesman',
     list: [
         { name: '-' },
-        { name: 'Sal', region: 'CA', subregion: 'SC' },
-        { name: 'Zac', region: 'CA', subregion: 'SC' },
-        { name: 'Dom', region: 'CA', subregion: 'SC' },
-        { name: 'Dave', region: 'CA', subregion: 'NC' },
-        { name: 'Nick B.', region: 'CA', subregion: 'NC' },
-        { name: 'Chris', region: 'AZ' },
-        { name: 'Nick M.', region: 'AZ' }
+        { name: 'Sal', value: 'SalS', region: 'CA', subregion: 'SC' },
+        { name: 'Zac', value: 'Zac', region: 'CA', subregion: 'SC' },
+        { name: 'Dom', value: 'DC', region: 'CA', subregion: 'SC' },
+        { name: 'Dave', value: 'Dave', region: 'CA', subregion: 'NC' },
+        { name: 'Nick B.', value: 'NB', region: 'CA', subregion: 'NC' },
+        { name: 'Chris', value: 'CHP', region: 'AZ' },
+        { name: 'Nick M.', value: 'NickM', region: 'AZ' }
     ]
 };
 
@@ -108,6 +97,7 @@ const AZ_CITIES = {
         { name: 'Kearny', class: 'MP' },
         { name: 'Mesa', class: 'MP' },
         { name: 'Marana', class: 'TU' },
+        { name: 'Mayer', class: 'NA' },
         { name: 'New River', class: 'NA' },
         { name: 'Pheonix', class: 'MP' },
         { name: 'Preoria', class: 'MP' },
@@ -129,14 +119,15 @@ const SOURCES = {
     name: 'sources',
     list: [
         { name: '-' },
-        { name: 'Postcard', type: 'CI', abbreviation: 'PC' },
-        { name: 'Park Magazine', type: 'CI', abbreviation: 'PM' },
-        { name: 'Web Advertizements', type: 'CI', abbreviation: 'Web' },
+        { name: '(CI) Postcard', type: 'CI', abbreviation: 'PC' },
+        { name: '(CI) Park Magazine', type: 'CI', abbreviation: 'PM' },
+        { name: '(CI) Web Advertizements', type: 'CI', abbreviation: 'Web' },
+        { name: '(CI) Referral', type: 'CI', abbreviation: 'Ref.' },
+        { name: '(WC) Carlyn', type: 'WC' },
+        { name: '(WC) Viki', type: 'WC' },
+        { name: '(WC) Jose', type: 'WC' },
         { name: 'Go Back' },
         { name: 'Upsale' },
-        { name: 'Carlyn', type: 'WC' },
-        { name: 'Viki', type: 'WC' },
-        { name: 'Jose', type: 'WC' }
     ]
 };
 
