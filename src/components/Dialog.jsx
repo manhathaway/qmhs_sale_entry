@@ -10,40 +10,29 @@ import {
     getSource,
     buildAddressText,
     buildEstimateText,
-    buildNoteText
+    buildNoteText,
+    getSelectedEntry,
+    required,
+    verifyFields
 } from '../dialogHelpers.js';
 
-const getSelectedEntry = (data, value) => {
-    return data.list.find(
-        item => item.name === value
-    );
-};
-
-const required = (field, errorText) => {
-    if (field) return field;
-    return '[MISSING]';
-};
-
-// const validateField = (field) => {
-//     if (field !== '[MISSING]') return { backgroundColor: 'rgba(0, 255, 0, 0.25)' };
-//     return { backgroundColor: 'rgba(255, 0, 0, 0.25)' };
-// };
-
-const CopyText = ({ children, overide, unstyle, ...props }) => {
+const CopyText = ({ children, validate, overideValidateData, overideClipboard, overideValidate, ...props }) => {
     return (
         <div
             onClick={() =>
-                navigator.clipboard.writeText(overide || children)
+                navigator.clipboard.writeText(overideClipboard || children)
             }
             className={css.CopyText}
-            // style={
-            //     !unstyle ? validateField(children) : undefined
-            // }
+            style={{
+                backgroundColor: verifyFields(overideValidateData || children)
+                    ? 'rgba(0,255,0,0.1)'
+                    : 'rgba(255,0,0,0.1)'
+            }}
             {...props}
         >
             {children}
         </div>
-    );
+    )
 };
 
 const Dialog = ({ formData }) => {
@@ -54,17 +43,19 @@ const Dialog = ({ formData }) => {
         deposit_number: Number(formData.deposit.replace(/[^0-9.-]+/g, ""))
     };
 
-    const salesmanObj = getSelectedEntry(SALESMEN, formData.salesman);
-    const cityObj = getSelectedEntry(AZ_CITIES, formData.city);
-    const sourceObj = getSelectedEntry(SOURCES, formData.sources);
+    const selectedData = {
+        salesman: getSelectedEntry(SALESMEN, formData.salesman),
+        city: getSelectedEntry(AZ_CITIES, formData.city),
+        source: getSelectedEntry(SOURCES, formData.sources)
+    };
 
     const addressTextData = {
-        address_name: required(formattedFields.address_name),
-        address: required(formData.address)
+        address_name: required(formattedFields.address_name, '[MISSING NAME]'),
+        address: required(formData.address, '[MISSING ADDRESS]')
     };
 
     const estimateTextData = {
-        job_description: required(formData.job_description),
+        job_description: required(formData.job_description, '*** DESCRIPTION TO BE TYPED ***'),
         financed: formData.financed,
         amount_financed: required(formData.amount_financed),
         account_number: required(formData.account_number),
@@ -77,10 +68,10 @@ const Dialog = ({ formData }) => {
     };
 
     const estimateDetailsData = {
-        class: required(getClass(salesmanObj, cityObj)),
+        class: required(getClass(selectedData.salesmen, selectedData.city)),
         contract_date: required(formattedFields.contract_date),
-        salesman: required(salesmanObj && salesmanObj.value),
-        source: required(getSource(sourceObj)),
+        salesman: required(selectedData.salesmen && selectedData.salesman.value),
+        source: required(getSource(selectedData.source)),
         price: required(formattedFields.price_number)
     };
 
@@ -92,13 +83,13 @@ const Dialog = ({ formData }) => {
     }
 
     const excelRowData = {
-        Region: required(getRegion(salesmanObj)),
+        Region: required(getRegion(selectedData.salesman)),
         Date: required(formattedFields.contract_date),
         Salesman: required(formData.salesman),
         Customer: required(formData.name),
         Job: required(formData.job_name),
         Price: required(formattedFields.price_number),
-        Status: required(getStatus(salesmanObj))
+        Status: required(getStatus(selectedData.salesman))
     };
 
     return (
@@ -119,12 +110,16 @@ const Dialog = ({ formData }) => {
                     )}
                 </div>
                 <div id={css.estimateDescriptionContainer} className={css.imageContainer}>
-                    <CopyText id={css.job_description} unstyle>{buildEstimateText(estimateTextData)}</CopyText>
+                    <CopyText id={css.job_description}>{buildEstimateText(estimateTextData)}</CopyText>
                 </div>
                 <div id={css.crmNoteContainer} className={css.imageContainer}>
-                    <CopyText id={css.crm_note} unstyle>{buildNoteText(noteTextData)}</CopyText>
+                    <CopyText id={css.crm_note}>{buildNoteText(noteTextData)}</CopyText>
                 </div>
-                <CopyText id={css.excelRowContainer} overide={Object.values(excelRowData).join('\t')} unstyle>
+                <CopyText
+                    id={css.excelRowContainer}
+                    overideClipboard={Object.values(excelRowData).join('\t')}
+                    overideValidateData={excelRowData}
+                >
                     <table>
                         <tr>
                             {Object.keys(excelRowData).map((heading, index) =>

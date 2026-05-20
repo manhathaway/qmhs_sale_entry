@@ -109,6 +109,27 @@ const buildNoteText = (data) => {
     return text;
 };
 
+const getSelectedEntry = (data, value) => {
+    return data.list.find(
+        item => item.name === value
+    );
+};
+
+const required = (field, errorText) => {
+    if (field) return field;
+    return errorText || '[MISSING]';
+};
+
+const verifyFields = (data) => {
+    if (typeof (data) === 'object') {
+        return Object.values(data).every(value => {
+            return !String(value).includes('MISSING');
+        });
+    } else {
+        return !String(data).includes('MISSING');
+    }
+};
+
 export {
     getClass,
     getRegion,
@@ -117,4 +138,7 @@ export {
     buildAddressText,
     buildEstimateText,
     buildNoteText,
+    getSelectedEntry,
+    required,
+    verifyFields
 };

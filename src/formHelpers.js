@@ -14,6 +14,11 @@ export const buildInitialState = (schema) => {
     return state;
 };
 
+export const isEnabled = (field, data, Obj) => {
+    if (!field.enabledWhen) return true;
+    return field.enabledWhen(data, Obj);
+};
+
 export const updateField = (setFormData, id, value) => {
     setFormData(prev => ({
         ...prev,

@@ -1,4 +1,4 @@
-const FORM_SCHEMA = [
+export const FORM_SCHEMA = [
     { id: 'name', label: 'Name', type: 'text' },
     { id: 'email_date', label: 'Email Date', type: 'text' },
     { id: 'new_customer', label: 'New Customer?', type: 'checkbox' },
@@ -61,7 +61,7 @@ const FORM_SCHEMA = [
     }
 ];
 
-const SALESMEN = {
+export const SALESMEN = {
     name: 'salesman',
     list: [
         { name: '-' },
@@ -75,7 +75,7 @@ const SALESMEN = {
     ]
 };
 
-const AZ_CITIES = {
+export const AZ_CITIES = {
     name: 'AZ Cities',
     list: [
         { name: '-' },
@@ -115,7 +115,7 @@ const AZ_CITIES = {
     ]
 };
 
-const SOURCES = {
+export const SOURCES = {
     name: 'sources',
     list: [
         { name: '-' },
@@ -131,7 +131,7 @@ const SOURCES = {
     ]
 };
 
-const DEPOSIT_TYPES = {
+export const DEPOSIT_TYPES = {
     name: 'depositType',
     list: [
         { name: '-' },
@@ -142,4 +142,9 @@ const DEPOSIT_TYPES = {
     ]
 };
 
-export { FORM_SCHEMA, SALESMEN, AZ_CITIES, SOURCES, DEPOSIT_TYPES };
+export const SELECT_DATA = {
+    salesman: SALESMEN,
+    cities: AZ_CITIES,
+    sources: SOURCES,
+    depositType: DEPOSIT_TYPES
+};

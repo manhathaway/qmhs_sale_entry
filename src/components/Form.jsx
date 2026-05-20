@@ -1,11 +1,16 @@
 import { useMemo, useState, useEffect } from 'react';
-
 import css from './Form.module.css';
-
-import { FORM_SCHEMA, SALESMEN, SOURCES, DEPOSIT_TYPES, AZ_CITIES } from '../data';
-
+import {
+    FORM_SCHEMA,
+    SALESMEN,
+    SOURCES,
+    DEPOSIT_TYPES,
+    AZ_CITIES,
+    SELECT_DATA
+} from '../data';
 import {
     buildInitialState,
+    isEnabled,
     updateField,
     updateCheckbox,
     addRow,
@@ -13,37 +18,34 @@ import {
     removeRow,
     formatCurrency
 } from '../formHelpers';
-
 import Dialog from './Dialog';
 import DynamicSection from './subcomponents/DynamicSection';
 import Button from './subcomponents/Button';
 
-const SELECT_DATA = {
-    salesman: SALESMEN,
-    cities: AZ_CITIES,
-    sources: SOURCES,
-    depositType: DEPOSIT_TYPES
-};
-
 const Form = () => {
-    const [formData, setFormData] = useState(
-        buildInitialState(FORM_SCHEMA)
-    );
+    const [formData, setFormData] = useState(() => {
+        try {
+            const localData = localStorage.getItem('formData');
+            if (localData) return JSON.parse(localData);
+        } catch (error) {
+            console.warn("Error reading localStorage:", error);
+        }
+        return buildInitialState(FORM_SCHEMA);
+    });
 
-    // useEffect(() => {
-    //     console.log(formData);
-    // }, [formData]);
+    useEffect(() => {
+        try {
+            localStorage.setItem('formData', JSON.stringify(formData));
+        } catch (error) {
+            console.error("Error saving localStorage:", error);
+        }
+    }, [formData]);
 
     const selectedSalesman = useMemo(() => {
         return SALESMEN.list.find(
             p => p.name === formData.salesman
         );
     }, [formData.salesman]);
-
-    const isEnabled = (field) => {
-        if (!field.enabledWhen) return true;
-        return field.enabledWhen(formData, { selectedSalesman });
-    };
 
     return (
         <>
@@ -62,7 +64,7 @@ const Form = () => {
                                     onChange={(e) =>
                                         updateField(setFormData, field.id, e.target.value)
                                     }
-                                    disabled={!isEnabled(field)}
+                                    disabled={!isEnabled(field, formData, selectedSalesman)}
                                 >
                                     {SELECT_DATA[field.data].list.map(
                                         (item, index) => (
@@ -77,7 +79,7 @@ const Form = () => {
                                     onChange={(e) =>
                                         updateField(setFormData, field.id, e.target.value)
                                     }
-                                    disabled={!isEnabled(field)}
+                                    disabled={!isEnabled(field, formData, selectedSalesman)}
                                 />
                             ) : (
                                 <input
@@ -102,7 +104,7 @@ const Form = () => {
                                             );
                                         }
                                     }}
-                                    disabled={!isEnabled(field)}
+                                    disabled={!isEnabled(field, formData, selectedSalesman)}
                                 />
                             )}
                         </div>
@@ -125,7 +127,6 @@ const Form = () => {
                 })}
             </form>
             <Dialog formData={formData} />
-
             <div id={css.formButtonContainer}>
                 <Button id={css.clearButton} onClick={() => setFormData(buildInitialState(FORM_SCHEMA))}>
                     Clear
