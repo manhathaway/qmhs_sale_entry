@@ -10,7 +10,6 @@ import {
 } from '../data';
 import {
     buildInitialState,
-    isEnabled,
     updateField,
     updateCheckbox,
     addRow,
@@ -47,6 +46,11 @@ const Form = () => {
         );
     }, [formData.salesman]);
 
+    const isEnabled = (field) => {
+        if (!field.enabledWhen) return true;
+        return field.enabledWhen(formData, { selectedSalesman });
+    };
+
     return (
         <>
             <form id={css.container}>
@@ -64,7 +68,7 @@ const Form = () => {
                                     onChange={(e) =>
                                         updateField(setFormData, field.id, e.target.value)
                                     }
-                                    disabled={!isEnabled(field, formData, selectedSalesman)}
+                                    disabled={!isEnabled(field)}
                                 >
                                     {SELECT_DATA[field.data].list.map(
                                         (item, index) => (
@@ -79,7 +83,7 @@ const Form = () => {
                                     onChange={(e) =>
                                         updateField(setFormData, field.id, e.target.value)
                                     }
-                                    disabled={!isEnabled(field, formData, selectedSalesman)}
+                                    disabled={!isEnabled(field)}
                                 />
                             ) : (
                                 <input
@@ -104,7 +108,7 @@ const Form = () => {
                                             );
                                         }
                                     }}
-                                    disabled={!isEnabled(field, formData, selectedSalesman)}
+                                    disabled={!isEnabled(field)}
                                 />
                             )}
                         </div>

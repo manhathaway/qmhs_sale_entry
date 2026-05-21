@@ -76,8 +76,8 @@ const buildEstimateText = (data) => {
 
     text += `\nPrice: ${data.price}`;
     text += `\nDeposit: ${data.deposit}`;
-    if (data.depositType) {
-        text += ` - ${data.depositType}`;
+    if (data.deposit_type) {
+        text += ` - ${data.deposit_type}`;
     }
     text += `\nBalance: ${data.balance}`
 

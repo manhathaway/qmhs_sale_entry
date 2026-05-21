@@ -23,7 +23,7 @@ export const FORM_SCHEMA = [
     { id: 'job_description', label: 'Job Description', type: 'textarea' },
     { id: 'price', label: 'Price', type: 'text', currency: true },
     { id: 'deposit', label: 'Deposit', type: 'text', currency: true },
-    { id: 'depositType', label: 'Deposit Type', type: 'select', data: 'depositType' },
+    { id: 'deposit_types', label: 'Deposit Type', type: 'select', data: 'deposit_types' },
     { id: 'financed', label: 'Financed?', type: 'checkbox' },
     {
         id: 'amount_financed',
@@ -76,7 +76,7 @@ export const SALESMEN = {
 };
 
 export const AZ_CITIES = {
-    name: 'AZ Cities',
+    name: 'AZ_cities',
     list: [
         { name: '-' },
         { name: 'N/A' },
@@ -119,20 +119,20 @@ export const SOURCES = {
     name: 'sources',
     list: [
         { name: '-' },
-        { name: '(CI) Postcard', type: 'CI', abbreviation: 'PC' },
-        { name: '(CI) Park Magazine', type: 'CI', abbreviation: 'PM' },
-        { name: '(CI) Web Advertizements', type: 'CI', abbreviation: 'Web' },
-        { name: '(CI) Referral', type: 'CI', abbreviation: 'Ref.' },
-        { name: '(WC) Carlyn', type: 'WC' },
-        { name: '(WC) Viki', type: 'WC' },
-        { name: '(WC) Jose', type: 'WC' },
+        { name: 'Postcard', type: 'CI', abbreviation: 'PC' },
+        { name: 'Park Magazine', type: 'CI', abbreviation: 'PM' },
+        { name: 'Web Advertizements', type: 'CI', abbreviation: 'Web' },
+        { name: 'Referral', type: 'CI', abbreviation: 'Ref.' },
+        { name: 'Carlyn', type: 'WC' },
+        { name: 'Viki', type: 'WC' },
+        { name: 'Jose', type: 'WC' },
         { name: 'Go Back' },
         { name: 'Upsale' },
     ]
 };
 
 export const DEPOSIT_TYPES = {
-    name: 'depositType',
+    name: 'deposit_types',
     list: [
         { name: '-' },
         { name: 'CC' },
@@ -146,5 +146,5 @@ export const SELECT_DATA = {
     salesman: SALESMEN,
     cities: AZ_CITIES,
     sources: SOURCES,
-    depositType: DEPOSIT_TYPES
+    deposit_types: DEPOSIT_TYPES
 };

@@ -63,14 +63,14 @@ const Dialog = ({ formData }) => {
         discounts: required(formData.discounts),
         price: required(formData.price),
         deposit: required(formData.deposit),
-        deposit_type: required(formData.deposit_type),
+        deposit_type: required(formData.deposit_types),
         balance: required(formatCurrency(formattedFields.price_number - formattedFields.deposit_number))
     };
 
     const estimateDetailsData = {
-        class: required(getClass(selectedData.salesmen, selectedData.city)),
+        class: required(getClass(selectedData.salesman, selectedData.city)),
         contract_date: required(formattedFields.contract_date),
-        salesman: required(selectedData.salesmen && selectedData.salesman.value),
+        salesman: required(selectedData.salesman && selectedData.salesman.value),
         source: required(getSource(selectedData.source)),
         price: required(formattedFields.price_number)
     };
