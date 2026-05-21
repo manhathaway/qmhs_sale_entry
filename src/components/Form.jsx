@@ -42,7 +42,7 @@ const Form = () => {
 
     const selectedSalesman = useMemo(() => {
         return SALESMEN.list.find(
-            p => p.name === formData.salesman
+            p => p.value === formData.salesman
         );
     }, [formData.salesman]);
 
@@ -72,7 +72,7 @@ const Form = () => {
                                 >
                                     {SELECT_DATA[field.data].list.map(
                                         (item, index) => (
-                                            <option key={index} value={item.name}>{item.name}</option>
+                                            <option key={index} value={item.value}>{item.name}</option>
                                         )
                                     )}
                                 </select>

@@ -27,17 +27,8 @@ const getStatus = (salesmanObj) => {
 }
 
 const getSource = (sourceObj) => {
-    if (sourceObj) {
-        if (sourceObj.type && sourceObj.abbreviation) {
-            return `${sourceObj.type} - ${sourceObj.abbreviation}`;
-        } else if (sourceObj.type) {
-            return `${sourceObj.type} - ${sourceObj.name}`;
-        } else {
-            return sourceObj.name;
-        }
-    } else {
-        return null;
-    }
+    if (sourceObj) return sourceObj.value;
+    return null;
 };
 
 const buildAddressText = (data) => {
@@ -79,7 +70,7 @@ const buildEstimateText = (data) => {
     if (data.deposit_type) {
         text += ` - ${data.deposit_type}`;
     }
-    text += `\nBalance: ${data.balance}`
+    text += `\nBalance: ${data.balance ? data.balance : '$0'}`
 
     return text;
 };
@@ -111,7 +102,7 @@ const buildNoteText = (data) => {
 
 const getSelectedEntry = (data, value) => {
     return data.list.find(
-        item => item.name === value
+        item => item.value === value
     );
 };
 

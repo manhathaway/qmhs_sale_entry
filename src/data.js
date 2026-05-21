@@ -13,17 +13,17 @@ export const FORM_SCHEMA = [
         id: 'city',
         label: 'City',
         type: 'select',
-        data: 'cities',
+        data: 'city',
         enabledWhen: (form, ctx) =>
             ctx.selectedSalesman?.region === 'AZ'
     },
     { id: 'contract_date', label: 'Contract Date', type: 'date' },
-    { id: 'sources', label: 'Source', type: 'select', data: 'sources' },
+    { id: 'source', label: 'Source', type: 'select', data: 'source' },
     { id: 'job_name', label: 'Job Name', type: 'text' },
     { id: 'job_description', label: 'Job Description', type: 'textarea' },
     { id: 'price', label: 'Price', type: 'text', currency: true },
     { id: 'deposit', label: 'Deposit', type: 'text', currency: true },
-    { id: 'deposit_types', label: 'Deposit Type', type: 'select', data: 'deposit_types' },
+    { id: 'deposit_type', label: 'Deposit Type', type: 'select', data: 'deposit_type' },
     { id: 'financed', label: 'Financed?', type: 'checkbox' },
     {
         id: 'amount_financed',
@@ -62,7 +62,7 @@ export const FORM_SCHEMA = [
 ];
 
 export const SALESMEN = {
-    name: 'salesman',
+    name: 'salesmen',
     list: [
         { name: '-' },
         { name: 'Sal', value: 'SalS', region: 'CA', subregion: 'SC' },
@@ -78,73 +78,73 @@ export const SALESMEN = {
 export const AZ_CITIES = {
     name: 'AZ_cities',
     list: [
-        { name: '-' },
-        { name: 'N/A' },
-        { name: 'Apache Junction', class: 'MP' },
-        { name: 'Black Canyon City', class: 'NA' },
-        { name: 'Benson', class: 'TU' },
-        { name: 'Buckeye', class: 'MP' },
-        { name: 'Casa Grande', class: 'MP' },
-        { name: 'Cave Creek', class: 'MP' },
-        { name: 'Chandler', class: 'MP' },
-        { name: 'Chino Valley', class: 'NA' },
-        { name: 'Cottonwood', class: 'MP' },
-        { name: 'Dewey', class: 'NA' },
-        { name: 'Flagstaff', class: 'NA' },
-        { name: 'Gilbert', class: 'MP' },
-        { name: 'Glendale', class: 'MP' },
-        { name: 'Goodyear', class: 'MP' },
-        { name: 'Kearny', class: 'MP' },
-        { name: 'Mesa', class: 'MP' },
-        { name: 'Marana', class: 'TU' },
-        { name: 'Mayer', class: 'NA' },
-        { name: 'New River', class: 'NA' },
-        { name: 'Pheonix', class: 'MP' },
-        { name: 'Preoria', class: 'MP' },
-        { name: 'Prescott', class: 'NA' },
-        { name: 'Queen Creek', class: 'MP' },
-        { name: 'San Tan Valley', class: 'MP' },
-        { name: 'Sedona', class: 'NA' },
-        { name: 'Sun Lakes', class: 'MP' },
-        { name: 'Superior', class: 'MP' },
-        { name: 'Surprise', class: 'MP' },
-        { name: 'Tempe', class: 'MP' },
-        { name: 'Tucson', class: 'TU' },
-        { name: 'Wickenburg', class: 'NA' },
-        { name: 'Witmann', class: 'NA' },
+        { name: '-', value: null },
+        { name: 'Apache Junction', value: 'Apache Junction', class: 'MP' },
+        { name: 'Avondale', value: 'Avondale', class: 'MP' },
+        { name: 'Black Canyon City', value: 'Black Canyon City', class: 'NA' },
+        { name: 'Benson', value: 'Benson', class: 'TU' },
+        { name: 'Buckeye', value: 'Buckeye', class: 'MP' },
+        { name: 'Casa Grande', value: 'Casa Grande', class: 'MP' },
+        { name: 'Cave Creek', value: 'Cave Creek', class: 'MP' },
+        { name: 'Chandler', value: 'Chandler', class: 'MP' },
+        { name: 'Chino Valley', value: 'Chino Valley', class: 'NA' },
+        { name: 'Cottonwood', value: 'Cottonwood', class: 'MP' },
+        { name: 'Dewey', value: 'Dewey', class: 'NA' },
+        { name: 'Flagstaff', value: 'Flagstaff', class: 'NA' },
+        { name: 'Gilbert', value: 'Gilbert', class: 'MP' },
+        { name: 'Glendale', value: 'Glendale', class: 'MP' },
+        { name: 'Goodyear', value: 'Goodyear', class: 'MP' },
+        { name: 'Kearny', value: 'Kearny', class: 'MP' },
+        { name: 'Mesa', value: 'Mesa', class: 'MP' },
+        { name: 'Marana', value: 'Marana', class: 'TU' },
+        { name: 'Mayer', value: 'Mayer', class: 'NA' },
+        { name: 'New River', value: 'New River', class: 'NA' },
+        { name: 'Pheonix', value: 'Pheonix', class: 'MP' },
+        { name: 'Preoria', value: 'Preoria', class: 'MP' },
+        { name: 'Prescott', value: 'Prescott', class: 'NA' },
+        { name: 'Queen Creek', value: 'Queen Creek', class: 'MP' },
+        { name: 'San Tan Valley', value: 'San Tan Valley', class: 'MP' },
+        { name: 'Sedona', value: 'Sedona', class: 'NA' },
+        { name: 'Sun Lakes', value: 'Sun Lakes', class: 'MP' },
+        { name: 'Superior', value: 'Superior', class: 'MP' },
+        { name: 'Surprise', value: 'Surprise', class: 'MP' },
+        { name: 'Tempe', value: 'Tempe', class: 'MP' },
+        { name: 'Tucson', value: 'Tucson', class: 'TU' },
+        { name: 'Wickenburg', value: 'Wickenburg', class: 'NA' },
+        { name: 'Witmann', value: 'Witmann', class: 'NA' },
     ]
 };
 
 export const SOURCES = {
     name: 'sources',
     list: [
-        { name: '-' },
-        { name: 'Postcard', type: 'CI', abbreviation: 'PC' },
-        { name: 'Park Magazine', type: 'CI', abbreviation: 'PM' },
-        { name: 'Web Advertizements', type: 'CI', abbreviation: 'Web' },
-        { name: 'Referral', type: 'CI', abbreviation: 'Ref.' },
-        { name: 'Carlyn', type: 'WC' },
-        { name: 'Viki', type: 'WC' },
-        { name: 'Jose', type: 'WC' },
-        { name: 'Go Back' },
-        { name: 'Upsale' },
+        { name: '-', value: null },
+        { name: 'Postcard', type: 'CI', value: 'CI - PC' },
+        { name: 'Park Magazine', type: 'CI', value: 'CI - PM' },
+        { name: 'Web Advertizements', type: 'CI', value: 'CI - Web' },
+        { name: 'Referral', type: 'CI', value: 'CI - Ref.' },
+        { name: 'Carlyn', type: 'WC', value: 'WC - Carlyn' },
+        { name: 'Viki', type: 'WC', value: 'WC - Viki' },
+        { name: 'Jose', type: 'WC', value: 'WC - Jose' },
+        { name: 'Go Back', value: 'Go Back' },
+        { name: 'Upsale', value: 'Upsale' },
     ]
 };
 
 export const DEPOSIT_TYPES = {
     name: 'deposit_types',
     list: [
-        { name: '-' },
-        { name: 'CC' },
-        { name: 'Check' },
-        { name: 'Cash' },
-        { name: 'Synchrony' }
+        { name: '-', value: null },
+        { name: 'Credit Card', value: 'CC' },
+        { name: 'Check', value: 'Check' },
+        { name: 'Cash', value: 'Cash' },
+        { name: 'Synchrony', value: 'Synchrony' }
     ]
 };
 
 export const SELECT_DATA = {
     salesman: SALESMEN,
-    cities: AZ_CITIES,
-    sources: SOURCES,
-    deposit_types: DEPOSIT_TYPES
+    city: AZ_CITIES,
+    source: SOURCES,
+    deposit_type: DEPOSIT_TYPES
 };

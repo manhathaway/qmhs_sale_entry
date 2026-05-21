@@ -46,7 +46,7 @@ const Dialog = ({ formData }) => {
     const selectedData = {
         salesman: getSelectedEntry(SALESMEN, formData.salesman),
         city: getSelectedEntry(AZ_CITIES, formData.city),
-        source: getSelectedEntry(SOURCES, formData.sources)
+        source: getSelectedEntry(SOURCES, formData.source)
     };
 
     const addressTextData = {
@@ -63,8 +63,8 @@ const Dialog = ({ formData }) => {
         discounts: required(formData.discounts),
         price: required(formData.price),
         deposit: required(formData.deposit),
-        deposit_type: required(formData.deposit_types),
-        balance: required(formatCurrency(formattedFields.price_number - formattedFields.deposit_number))
+        deposit_type: formData.deposit_type,
+        balance: formatCurrency(formattedFields.price_number - formattedFields.deposit_number)
     };
 
     const estimateDetailsData = {
