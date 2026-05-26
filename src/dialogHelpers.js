@@ -101,9 +101,8 @@ const buildNoteText = (data) => {
 };
 
 const getSelectedEntry = (data, value) => {
-    return data.list.find(
-        item => item.value === value
-    );
+    if (value) return data.list.find(item => item.value === value);
+    return null;
 };
 
 const required = (field, errorText) => {
