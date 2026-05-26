@@ -78,14 +78,14 @@ const Dialog = ({ formData }) => {
     const noteTextData = {
         contract_date: required(formattedFields.contract_date),
         price: required(formData.price),
-        salesman: required(formData.salesman),
+        salesman: required(selectedData.salesman.name),
         email_date: required(formData.email_date)
     }
 
     const excelRowData = {
         Region: required(getRegion(selectedData.salesman)),
         Date: required(formattedFields.contract_date),
-        Salesman: required(formData.salesman),
+        Salesman: required(selectedData.salesman.name),
         Customer: required(formData.name),
         Job: required(formData.job_name),
         Price: required(formattedFields.price_number),
