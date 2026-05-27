@@ -49,6 +49,16 @@
     opacity: 50%;
 }
 
+#address * {
+    width: 100%;
+}
+
+#job_description {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 #formButtonContainer {
     position: sticky;
     bottom: 0;

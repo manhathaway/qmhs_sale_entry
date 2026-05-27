@@ -77,14 +77,19 @@ const Form = () => {
                                     )}
                                 </select>
                             ) : field.type === 'textarea' ? (
-                                <textarea
-                                    className={css.textarea}
-                                    value={formData[field.id]}
-                                    onChange={(e) =>
-                                        updateField(setFormData, field.id, e.target.value)
-                                    }
-                                    disabled={!isEnabled(field)}
-                                />
+                                <div id={css[field.id]}>
+                                    <textarea
+                                        className={css.textarea}
+                                        value={formData[field.id]}
+                                        onChange={(e) =>
+                                            updateField(setFormData, field.id, e.target.value)
+                                        }
+                                        disabled={!isEnabled(field)}
+                                    />
+                                    {field.id === 'job_description' && (
+                                        <Button id={css.expandButton}>Expand</Button>
+                                    )}
+                                </div>
                             ) : (
                                 <input
                                     className={css.input}
