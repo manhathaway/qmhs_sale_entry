@@ -24,6 +24,7 @@
 
 .textarea {
     resize: none;
+    width: 100%;
     height: 100px;
 }
 
@@ -56,7 +57,13 @@
 #job_description {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+#expandButton {
+    width: fit-content;
+    padding: 0 10px;
 }
 
 #formButtonContainer {

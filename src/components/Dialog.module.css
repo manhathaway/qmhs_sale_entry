@@ -7,9 +7,9 @@
 }
 
 #dialogContainer {
+    padding: 15px;
     min-height: 90vh;
     min-width: fit-content;
-    margin-top: 15px;
     overflow: auto;
     display: flex;
     flex-direction: column;

@@ -1,6 +1,6 @@
 import css from './Dialog.module.css';
 import { useMemo, useEffect } from 'react';
-import IconButton from './subcomponents/Button';
+import Button from './subcomponents/Button';
 import { SALESMEN, AZ_CITIES, SOURCES } from '../data.js';
 import { formatCurrency } from '../formHelpers.js';
 import {
@@ -136,9 +136,9 @@ const Dialog = ({ formData }) => {
             </div>
 
             <div id={css.closeButtonContainer}>
-                <IconButton id={css.closeButton} commandfor="dialog" command="close">
+                <Button id={css.closeButton} commandfor="dialog" command="close">
                     Close
-                </IconButton>
+                </Button>
             </div>
         </dialog>
     );

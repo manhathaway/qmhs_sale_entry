@@ -67,11 +67,13 @@ export const SALESMEN = {
         { name: '-' },
         { name: 'Sal', value: 'SalS', region: 'CA', subregion: 'SC' },
         { name: 'Zac', value: 'Zac', region: 'CA', subregion: 'SC' },
-        { name: 'Dom', value: 'DC', region: 'CA', subregion: 'SC' },
+        { name: 'Dom (CA)', value: 'DC', region: 'CA', subregion: 'SC' },
         { name: 'Dave', value: 'Dave', region: 'CA', subregion: 'NC' },
         { name: 'Nick B.', value: 'NB', region: 'CA', subregion: 'NC' },
         { name: 'Chris', value: 'CHP', region: 'AZ' },
-        { name: 'Nick M.', value: 'NickM', region: 'AZ' }
+        { name: 'Nick M.', value: 'NickM', region: 'AZ' },
+        { name: 'Dom (AZ)', value: 'DC', region: 'AZ' },
+
     ]
 };
 

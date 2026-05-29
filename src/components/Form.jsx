@@ -19,6 +19,7 @@ import {
 } from '../formHelpers';
 import Dialog from './Dialog';
 import DynamicSection from './subcomponents/DynamicSection';
+import JobDescriptionDialog from './subcomponents/JobDescriptionDialog';
 import Button from './subcomponents/Button';
 
 const Form = () => {
@@ -87,7 +88,23 @@ const Form = () => {
                                         disabled={!isEnabled(field)}
                                     />
                                     {field.id === 'job_description' && (
-                                        <Button id={css.expandButton}>Expand</Button>
+                                        <>
+                                            <Button
+                                                type="button"
+                                                id={css.expandButton}
+                                                command="show-modal"
+                                                commandfor="expand"
+                                            >
+                                                Expand
+                                            </Button>
+                                            <JobDescriptionDialog
+                                                value={formData[field.id]}
+                                                onChange={(e) =>
+                                                    updateField(setFormData, field.id, e.target.value)
+                                                }
+                                                disabled={!isEnabled(field)}
+                                            />
+                                        </>
                                     )}
                                 </div>
                             ) : (

@@ -1,0 +1,27 @@
+.dialog {
+    background-color: white;
+    margin: auto;
+    padding: 15px;
+    border: none;
+}
+
+#textarea {
+    min-width: 400px;
+    min-height: 400px;
+    width: 50vw;
+    height: 50vh;
+    /* max-width: 800px;
+    max-height: 800px; */
+
+    font-size: 1.2rem;
+}
+
+#closeButtonContainer {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+#closeButton {
+    padding: 0 10px;
+}

@@ -1,6 +1,6 @@
 import css from './Button.module.css';
 
-const IconButton = ({
+const Button = ({
     children,
     className = '',
     ...props
@@ -15,4 +15,4 @@ const IconButton = ({
     );
 };
 
-export default IconButton;
+export default Button;
