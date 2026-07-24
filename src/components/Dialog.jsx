@@ -85,7 +85,7 @@ const Dialog = ({ formData }) => {
     const excelRowData = {
         Region: required(getRegion(selectedData.salesman)),
         Date: required(formattedFields.contract_date),
-        Salesman: required(selectedData.salesman && selectedData.salesman.name),
+        Salesman: required(selectedData.salesman && selectedData.salesman.value),
         Customer: required(formData.name),
         Job: required(formData.job_name),
         Price: required(formattedFields.price_number),

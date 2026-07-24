@@ -1,0 +1,203 @@
+const PROXY_BASE_URL = '/api';
+
+const PIPELINE_ITEM_FIELDS = [
+    'StatusMetaData',
+    'ContactMetaData',
+    'Contact',
+    'Sale Date',
+    'Sales Rep Assigned',
+    'Sale Amount',
+    'Customer Service Representative',
+    'Appointment Date',
+    'Deposit Amount',
+    'Depost Type',
+    'Finance Institution',
+    'Approved Amount',
+    'Lead Type',
+    'Lead Source',
+    'PipelineItemId',
+    'ContactId'
+];
+
+/**
+ * Make a request to the LACRM API
+ * @param {string} functionName - LACRM API function name (e.g., 'GetPipelineItems', 'GetContacts')
+ * @param {object} parameters - Function parameters
+ * @returns {Promise<object>} API response
+ */
+export async function makeRequest(functionName, parameters = {}) {
+    const body = {
+        functionName,
+        parameters,
+    };
+
+    console.log('makeRequest sending:', { functionName, parameters });
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    };
+
+    try {
+        const response = await fetch(`${PROXY_BASE_URL}/lacrm`, options);
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            console.error('❌ LACRM Proxy Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                lacrm_details: error.details,
+                lacrm_message: error.error,
+                request_payload: error.request,
+                response: error,
+            });
+            throw new Error(`API Error: ${response.status} - ${error.error || response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ LACRM Response Success:', {
+            hasResults: !!result.Results,
+            resultCount: result.Results ? result.Results.length : 0,
+        });
+        return result;
+    } catch (error) {
+        console.error('LACRM API Error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Filter pipeline items to only include specified fields and remove null values
+ * @param {array} items - Array of pipeline items from API
+ * @returns {array} Filtered pipeline items
+ */
+export function filterPipelineItems(items) {
+    if (!Array.isArray(items)) {
+        return items;
+    }
+
+    return items.map(item => {
+        const filtered = {};
+        PIPELINE_ITEM_FIELDS.forEach(field => {
+            if (item.hasOwnProperty(field)) {
+                const value = item[field];
+                // Only include if not null, undefined, or empty string
+                if (value !== null && value !== undefined && value !== '') {
+                    filtered[field] = value;
+                }
+            }
+        });
+        return filtered;
+    });
+}
+
+/**
+ * Get pipeline items sold on a specific date
+ * @param {string} pipelineId - Pipeline ID
+ * @param {string} saleDate - Date in format YYYY-MM-DD (e.g., '2026-07-23')
+ * @param {object} options - Optional parameters like { includeArchived: true }
+ * @returns {Promise<array>} Array of sold pipeline items with filtered fields
+ */
+export async function getItemsByDate(pipelineId, date, options = {}) {
+    const params = {
+        PipelineId: pipelineId,
+        AdvancedFilters: [
+            {
+                Name: 'pipelineField_3536386357020753823161095223915',
+                Operation: 'IsExactly',
+                Value: date
+            },
+        ],
+    };
+
+    const result = await makeRequest('GetPipelineItems', params);
+
+    // Return only the filtered Results array
+    return filterPipelineItems(result.Results || []);
+}
+
+export async function getEventsByDateRange(pipelineId, startDate, endDate) {
+    const params = {
+        IncludeArchivedPipelines: pipelineId,
+        StartDate: startDate,
+        EndDate: endDate,
+    };
+
+    const result = await makeRequest('GetEvents', params);
+
+    // Filter events to only those with ContactIds and extract contactId + contact name
+    return (result.Results || [])
+        .filter(event => event.ContactIds && event.ContactIds.length > 0)
+        .map(event => ({
+            contactId: event.ContactIds[0],
+            name: event.ContactMetaData && event.ContactMetaData.length > 0
+                ? event.ContactMetaData[0].Name
+                : 'Unknown',
+        }));
+}
+
+/**
+ * Get pipeline items for each event's contact, filtered by appointment date
+ * @param {string} pipelineId - Pipeline ID
+ * @param {string} startDate - Start date in format YYYY-MM-DD
+ * @param {string} endDate - End date in format YYYY-MM-DD
+ * @returns {Promise<array>} Array of pipeline items with contact info, filtered by appointment date
+ */
+export async function getEventPipelinesForDate(pipelineId, startDate, endDate) {
+    // First get all events with contacts
+    const events = await getEventsByDateRange(pipelineId, startDate, endDate);
+
+    if (!events.length) {
+        return [];
+    }
+
+    // For each contact, get their pipeline items
+    const allPipelines = [];
+
+    for (const event of events) {
+        try {
+            const result = await makeRequest('GetPipelineItemsAttachedToContact', {
+                ContactId: event.contactId,
+            });
+
+            // Result is an array of objects with PipelineId and PipelineItems
+            (result || []).forEach(pipelineGroup => {
+                const pipelineItems = pipelineGroup.PipelineItems || [];
+
+                // Filter by appointment date matching the start date
+                pipelineItems.forEach(item => {
+                    const appointmentDate = item['Appointment Date'];
+                    // Convert appointment date format (MM/DD/YYYY) to YYYY-MM-DD if needed
+                    let dateToMatch = appointmentDate;
+                    if (appointmentDate && appointmentDate.includes('/')) {
+                        const [month, day, year] = appointmentDate.split('/');
+                        dateToMatch = `${year}-${month}-${day}`;
+                    }
+
+                    if (dateToMatch === startDate) {
+                        allPipelines.push({
+                            ...item,
+                            contactName: event.name,
+                            contactId: event.contactId,
+                        });
+                    }
+                });
+            });
+        } catch (err) {
+            console.error(`Error fetching pipelines for contact ${event.contactId}:`, err);
+        }
+    }
+
+    return filterPipelineItems(allPipelines);
+}
+
+export default {
+    makeRequest,
+    filterPipelineItems,
+    getItemsByDate,
+    getEventsByDateRange,
+    getEventPipelinesForDate,
+};
