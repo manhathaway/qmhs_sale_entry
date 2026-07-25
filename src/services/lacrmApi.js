@@ -16,7 +16,11 @@ const PIPELINE_ITEM_FIELDS = [
     'Lead Type',
     'Lead Source',
     'PipelineItemId',
-    'ContactId'
+    'ContactId',
+    'eventStartTime',
+    'eventEndTime',
+    'contactName',
+    'contactId'
 ];
 
 /**
@@ -128,7 +132,7 @@ export async function getEventsByDateRange(pipelineId, startDate, endDate) {
 
     const result = await makeRequest('GetEvents', params);
 
-    // Filter events to only those with ContactIds and extract contactId + contact name
+    // Filter events to only those with ContactIds and extract contactId + contact name + event times
     return (result.Results || [])
         .filter(event => event.ContactIds && event.ContactIds.length > 0)
         .map(event => ({
@@ -136,6 +140,8 @@ export async function getEventsByDateRange(pipelineId, startDate, endDate) {
             name: event.ContactMetaData && event.ContactMetaData.length > 0
                 ? event.ContactMetaData[0].Name
                 : 'Unknown',
+            eventStartTime: event.StartDate,
+            eventEndTime: event.EndDate,
         }));
 }
 
@@ -167,21 +173,24 @@ export async function getEventPipelinesForDate(pipelineId, startDate, endDate) {
             (result || []).forEach(pipelineGroup => {
                 const pipelineItems = pipelineGroup.PipelineItems || [];
 
-                // Filter by appointment date matching the start date
+                // Filter by appointment date within the range
                 pipelineItems.forEach(item => {
                     const appointmentDate = item['Appointment Date'];
                     // Convert appointment date format (MM/DD/YYYY) to YYYY-MM-DD if needed
                     let dateToMatch = appointmentDate;
                     if (appointmentDate && appointmentDate.includes('/')) {
                         const [month, day, year] = appointmentDate.split('/');
-                        dateToMatch = `${year}-${month}-${day}`;
+                        dateToMatch = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
                     }
 
-                    if (dateToMatch === startDate) {
+                    // Check if date falls within the range
+                    if (dateToMatch >= startDate && dateToMatch <= endDate) {
                         allPipelines.push({
                             ...item,
                             contactName: event.name,
                             contactId: event.contactId,
+                            eventStartTime: event.eventStartTime,
+                            eventEndTime: event.eventEndTime,
                         });
                     }
                 });
