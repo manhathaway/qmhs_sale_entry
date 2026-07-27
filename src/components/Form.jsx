@@ -22,7 +22,7 @@ import DynamicSection from './subcomponents/DynamicSection';
 import JobDescriptionDialog from './subcomponents/JobDescriptionDialog';
 import Button from './subcomponents/Button';
 
-const Form = () => {
+const Form = ({ prefillData, onPrefillConsumed }) => {
     const [formData, setFormData] = useState(() => {
         try {
             const localData = localStorage.getItem('formData');
@@ -40,6 +40,19 @@ const Form = () => {
             console.error("Error saving localStorage:", error);
         }
     }, [formData]);
+
+    useEffect(() => {
+        if (!prefillData) return;
+
+        setFormData(() => ({
+            ...buildInitialState(FORM_SCHEMA),
+            ...prefillData,
+        }));
+
+        if (onPrefillConsumed) {
+            onPrefillConsumed();
+        }
+    }, [prefillData, onPrefillConsumed]);
 
     const selectedSalesman = useMemo(() => {
         return SALESMEN.list.find(

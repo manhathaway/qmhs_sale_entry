@@ -6,6 +6,16 @@ import styles from './AppNav.module.css';
 
 export default function AppNav() {
     const [activeTab, setActiveTab] = useState('leadsBoard');
+    const [leadPrefill, setLeadPrefill] = useState(null);
+
+    const handleLeadSelect = (prefillData) => {
+        setLeadPrefill(prefillData);
+        setActiveTab('saleEntry');
+    };
+
+    const handlePrefillConsumed = () => {
+        setLeadPrefill(null);
+    };
 
     return (
         <div className={styles.appContainer}>
@@ -26,10 +36,10 @@ export default function AppNav() {
 
             <div className={styles.tabContent}>
                 <div className={`${styles.tabPanel} ${activeTab === 'saleEntry' ? styles.visible : ''}`}>
-                    <Form />
+                    <Form prefillData={leadPrefill} onPrefillConsumed={handlePrefillConsumed} />
                 </div>
                 <div className={`${styles.tabPanel} ${activeTab === 'leadsBoard' ? styles.visible : ''}`}>
-                    <LeadsBoard />
+                    <LeadsBoard onLeadSelect={handleLeadSelect} />
                 </div>
             </div>
         </div>

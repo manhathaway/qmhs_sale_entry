@@ -1,20 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { getEventPipelinesForDate } from '../services/lacrmApi';
+import { buildSaleEntryPrefill, canTransferLeadToSaleEntry, getStatusShortName } from '../leadTransfer';
 import styles from './LeadsBoard.module.css';
 
-const simplifyStatus = (name) => {
-    if (!name) return name;
-    if (name.includes('Sale Won')) return 'Sale Won';
-    if (name.includes('Sale Lost')) return 'Sale Lost';
-    if (name.includes('Cancelled')) return 'Cancelled';
-    if (name.includes('Left Bid')) return 'Left Bid';
-    if (name.includes('No-Pitch')) return 'No Pitch';
-    if (name.includes('No Show')) return 'No Show';
-    if (name.includes('Assigned to Sales Representative')) return 'Assigned to Sales Rep.';
-    return name;
-};
-
-export default function LeadsBoard() {
+export default function LeadsBoard({ onLeadSelect }) {
     const pipelineId = '3533819624848357990560426858357'; // Fixed pipeline ID
     const [startDate, setStartDate] = useState('2026-07-24');
     const [endDate, setEndDate] = useState('');
@@ -35,9 +24,7 @@ export default function LeadsBoard() {
     }, []);
 
     // Fetch data automatically every 30 seconds and when date changes
-    const hasAppointmentConfirmedRef = useRef(false);
-
-    const fetchData = useCallback(async () => {
+    const fetchData = async () => {
         setLoading(true);
         setError(null);
 
@@ -60,51 +47,51 @@ export default function LeadsBoard() {
         } finally {
             setLoading(false);
         }
-    }, [startDate, endDate]);
+    };
 
     // Fetch data when date changes
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+    }, [startDate, endDate]);
 
-    // Track whether any 'Appointment Confirmed' items exist (via ref to avoid dep cycle)
+    // Set up auto-refresh interval based on items (only for today's date while 'Appointment Confirmed' items exist)
     useEffect(() => {
-        hasAppointmentConfirmedRef.current = items.some(item => {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+
+        // Check if there are any 'Appointment Confirmed' items
+        const hasAppointmentConfirmed = items.some(item => {
             const statusName = item.StatusMetaData && typeof item.StatusMetaData === 'object'
                 ? item.StatusMetaData.Name
                 : item.StatusMetaData;
+
             return statusName === 'Appointment Confirmed';
         });
-    }, [items]);
 
-    // Set up auto-refresh interval based on date (only for today, fires only when Appointment Confirmed items exist)
-    useEffect(() => {
-        const today = new Date().toISOString().split('T')[0];
-        if (startDate !== today || endDate) return;
+        // Set up interval for auto-refresh (30 seconds) only if viewing today AND there are 'Appointment Confirmed' items
+        let interval = null;
+        if (startDate === today && hasAppointmentConfirmed && !endDate) {
+            interval = setInterval(fetchData, 30000);
+        }
 
-        const interval = setInterval(() => {
-            if (hasAppointmentConfirmedRef.current) {
-                fetchData();
-            }
-        }, 30000);
-
-        return () => clearInterval(interval);
-    }, [startDate, endDate, fetchData]);
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [startDate, endDate, items]);
 
     // Get unique statuses and sales reps for filter options
     const uniqueStatuses = [...new Set(items.map(item => {
-        const statusName = item.StatusMetaData && typeof item.StatusMetaData === 'object' ? item.StatusMetaData.Name : item.StatusMetaData;
-        return simplifyStatus(statusName);
+        return getStatusShortName(item);
     }).filter(Boolean))].sort();
 
     const uniqueReps = [...new Set(items.map(item => item['Sales Rep Assigned']).filter(Boolean))].sort();
 
     // Filter items based on selected filters
     const filteredItems = items.filter(item => {
-        const statusName = item.StatusMetaData && typeof item.StatusMetaData === 'object' ? item.StatusMetaData.Name : item.StatusMetaData;
+        const statusName = getStatusShortName(item);
         const rep = item['Sales Rep Assigned'];
 
-        const statusMatch = selectedStatuses.length === 0 || selectedStatuses.includes(simplifyStatus(statusName));
+        const statusMatch = selectedStatuses.length === 0 || selectedStatuses.includes(statusName);
         const repMatch = selectedReps.length === 0 || selectedReps.includes(rep);
 
         return statusMatch && repMatch;
@@ -126,6 +113,11 @@ export default function LeadsBoard() {
         );
     };
 
+    const handleLeadClick = (lead) => {
+        if (!canTransferLeadToSaleEntry(lead) || !onLeadSelect) return;
+        onLeadSelect(buildSaleEntryPrefill(lead, items));
+    };
+
     return (
         <div className={styles.container}>
             <div className={styles.header}>
@@ -141,7 +133,7 @@ export default function LeadsBoard() {
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                         placeholder="End Date (Optional)"
-                        title="End Date (Optional)"
+                        title="Optional - leave blank for single day"
                     />
                     <button
                         className={styles.filterButton}
@@ -158,7 +150,7 @@ export default function LeadsBoard() {
             {showFilters && (
                 <div className={styles.filterPanel}>
                     <div className={styles.filterSection}>
-                        <div className={styles.filterTitle}>Status</div>
+                        <div className={styles.filterTitle}>Statuses</div>
                         <div className={styles.filterOptions}>
                             {uniqueStatuses.map(status => (
                                 <label key={status} className={styles.filterCheckbox}>
@@ -174,7 +166,7 @@ export default function LeadsBoard() {
                     </div>
 
                     <div className={styles.filterSection}>
-                        <div className={styles.filterTitle}>Sales Rep.</div>
+                        <div className={styles.filterTitle}>Sales Reps</div>
                         <div className={styles.filterOptions}>
                             {uniqueReps.map(rep => (
                                 <label key={rep} className={styles.filterCheckbox}>
@@ -217,13 +209,14 @@ export default function LeadsBoard() {
                             const endB = b.eventEndTime ? new Date(b.eventEndTime).getTime() : Infinity;
                             return endA - endB;
                         }).map((item, idx) => {
-                            const statusName = item.StatusMetaData && typeof item.StatusMetaData === 'object' ? item.StatusMetaData.Name : item.StatusMetaData;
+                            const statusName = getStatusShortName(item);
                             let statusClass = '';
-                            if (statusName && statusName.includes('Sale Won')) statusClass = styles.saleWon;
-                            else if (statusName && statusName.includes('Cancelled')) statusClass = styles.saleLost;
-                            else if (statusName && statusName.includes('Sale Lost')) statusClass = styles.saleLost;
-                            else if (statusName && (statusName.includes('No-Pitch') || statusName.includes('Left Bid') || statusName.includes('Porched') || statusName.includes('No Show'))) statusClass = styles.noOptionOrLeftBid;
+                            if (statusName === 'Sale Won') statusClass = styles.saleWon;
+                            else if (statusName === 'Sale Lost' || statusName === 'Cancelled') statusClass = styles.saleLost;
+                            else if (statusName === 'No-Pitch' || statusName === 'Left Bid' || statusName === 'Porched/No Show') statusClass = styles.noOptionOrLeftBid;
                             else if (statusName === 'Appointment Confirmed') statusClass = styles.appointmentConfirmed;
+
+                            const canTransfer = canTransferLeadToSaleEntry(item);
 
                             // Calculate progress value for progress element (updates every second)
                             let progressValue = 100; // Default to 100 (solid) for non-Appointment Confirmed
@@ -246,7 +239,21 @@ export default function LeadsBoard() {
                             void updateTrigger;
 
                             return (
-                                <div key={idx} className={`${styles.item} ${statusClass}`}>
+                                <div
+                                    key={idx}
+                                    className={`${styles.item} ${statusClass} ${canTransfer ? styles.clickableItem : ''}`}
+                                    onClick={() => handleLeadClick(item)}
+                                    onKeyDown={(e) => {
+                                        if (!canTransfer) return;
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            handleLeadClick(item);
+                                        }
+                                    }}
+                                    role={canTransfer ? 'button' : undefined}
+                                    tabIndex={canTransfer ? 0 : undefined}
+                                    title={canTransfer ? 'Click to load into Sale Entry' : undefined}
+                                >
                                     <progress className={styles.progress} value={progressValue} max="100"></progress>
 
                                     <div className={styles.itemContent}>
@@ -263,11 +270,11 @@ export default function LeadsBoard() {
                                         </div>
                                     </div>
 
-                                    {/* Status and Date footer */}
-                                    <div className={styles.itemFooter}>
-                                        {item.StatusMetaData && <div className={styles.status}>{simplifyStatus(typeof item.StatusMetaData === 'object' ? item.StatusMetaData.Name : item.StatusMetaData)}</div>}
-                                        {item['Appointment Date'] && <div className={styles.date}>{item['Appointment Date']}</div>}
-                                    </div>
+                                    {/* Date on bottom right */}
+                                    {item['Appointment Date'] && <div className={styles.date}>{item['Appointment Date']}</div>}
+
+                                    {/* Status centered at bottom */}
+                                    {item.StatusMetaData && <div className={styles.status}>{statusName}</div>}
                                 </div>
                             );
                         })}

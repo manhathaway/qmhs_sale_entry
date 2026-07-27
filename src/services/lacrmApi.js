@@ -10,6 +10,7 @@ const PIPELINE_ITEM_FIELDS = [
     'Customer Service Representative',
     'Appointment Date',
     'Deposit Amount',
+    'Deposit Type',
     'Depost Type',
     'Finance Institution',
     'Approved Amount',
