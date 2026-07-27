@@ -238,19 +238,22 @@
     opacity: 0.75;
 }
 
-.date {
-    font-size: 12px;
-    margin-bottom: 8px;
-    text-align: right;
-    opacity: 0.75;
+.itemFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    border-top: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 .status {
     font-size: 12px;
-    text-align: center;
     font-weight: 500;
-    padding-top: 6px;
-    border-top: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.date {
+    font-size: 12px;
+    opacity: 0.75;
 }
 
 .item div:last-child {
@@ -281,19 +284,19 @@
     border-color: #0d47a1;
 }
 
-.item.saleWon .status {
+.item.saleWon .itemFooter {
     border-top-color: #1b5e20;
 }
 
-.item.saleLost .status {
+.item.saleLost .itemFooter {
     border-top-color: #b71c1c;
 }
 
-.item.noOptionOrLeftBid .status {
+.item.noOptionOrLeftBid .itemFooter {
     border-top-color: #cc8800;
 }
 
-.item.appointmentConfirmed .status {
+.item.appointmentConfirmed .itemFooter {
     border-top-color: #0d47a1;
 }
 
