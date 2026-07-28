@@ -152,11 +152,7 @@ const bootstrap = async () => {
       maxAge: '1h',
     }));
 
-    app.get('*', (req, res, next) => {
-      if (req.path.startsWith('/api') || req.path === '/health') {
-        return next();
-      }
-
+    app.get(/^(?!\/api(?:\/|$)|\/health$).*/, (req, res) => {
       return res.sendFile(distIndexPath);
     });
   }
