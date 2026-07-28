@@ -152,7 +152,7 @@ export const canTransferLeadToSaleEntry = (lead) => {
     return TRANSFERABLE_STATUSES.includes(statusName);
 };
 
-export const buildSaleEntryPrefill = (lead, allLeads = []) => {
+export const buildSaleEntryPrefill = (lead) => {
     const base = buildInitialState(FORM_SCHEMA);
 
     const saleAmount = lead['Sale Amount'] || '';

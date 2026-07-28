@@ -1,4 +1,5 @@
-const PROXY_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const PROXY_BASE_URL = `${API_BASE_URL}/api`;
 
 const PIPELINE_ITEM_FIELDS = [
     'StatusMetaData',
@@ -43,6 +44,7 @@ export async function makeRequest(functionName, parameters = {}) {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(body),
     };
 

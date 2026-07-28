@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: qmhs-sale-entry
+    runtime: node
+    plan: starter
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: TRUST_PROXY
+        value: "1"
+      - key: SESSION_COOKIE_SAME_SITE
+        value: strict
+      - key: SESSION_MAX_AGE_MS
+        value: "43200000"
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: qmhs-redis
+          property: connectionString
+      - key: LACRM_API_KEY
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: AUTH_USERNAME
+        sync: false
+      - key: AUTH_PASSWORD_HASH
+        sync: false
+
+  - type: redis
+    name: qmhs-redis
+    plan: starter
+    maxmemoryPolicy: noeviction
