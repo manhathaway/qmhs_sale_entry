@@ -184,13 +184,10 @@
 
 .clickableItem {
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .clickableItem:hover,
 .clickableItem:focus-visible {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     outline: none;
 }
 
@@ -212,6 +209,22 @@
     justify-content: space-between;
     flex: 1;
     margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--pipeline-divider-color, rgba(0, 0, 0, 0.1));
+}
+
+.itemFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.footerLeft,
+.footerRight {
+    min-width: 0;
 }
 
 .leftColumn {
@@ -249,17 +262,68 @@
 
 .date {
     font-size: 12px;
-    margin-bottom: 8px;
     text-align: right;
     opacity: 0.75;
 }
 
 .status {
     font-size: 12px;
-    text-align: center;
+    text-align: left;
     font-weight: 500;
-    padding-top: 6px;
-    border-top: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.actionButtonPrimary,
+.actionButtonSecondary {
+    flex: 1;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    min-height: 28px;
+}
+
+.actionButtonPrimary:hover:not(:disabled),
+.actionButtonSecondary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.actionButtonPrimary:disabled,
+.actionButtonSecondary:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    box-shadow: none;
+    transform: none;
+}
+
+.actionButtonPrimary {
+    background-color: var(--pipeline-button-bg, #007bff);
+    color: var(--pipeline-button-text, #ffffff);
+    border-color: var(--pipeline-button-border, #0069d9);
+}
+
+.actionButtonPrimary:hover:not(:disabled) {
+    background-color: var(--pipeline-button-hover-bg, #0056b3);
+}
+
+.actionButtonSecondary {
+    background-color: color-mix(in srgb, var(--pipeline-button-bg, #f8f9fa) 86%, white);
+    color: var(--pipeline-button-text, #2d3a4a);
+    border-color: color-mix(in srgb, var(--pipeline-button-border, #ced4da) 85%, white);
+    opacity: 0.96;
+}
+
+.actionButtonSecondary:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--pipeline-button-hover-bg, #eef2f6) 86%, white);
 }
 
 .item div:last-child {
@@ -339,6 +403,14 @@
     background-color: #66bb6a;
 }
 
+.item.saleWon {
+    --pipeline-button-bg: #cfe7d0;
+    --pipeline-button-hover-bg: #b7d9b8;
+    --pipeline-button-border: #8abb8c;
+    --pipeline-button-text: #1b4d1d;
+    --pipeline-divider-color: #8abb8c;
+}
+
 .item.saleLost .progress {
     background-color: #ffcdd2;
 }
@@ -353,6 +425,14 @@
 
 .item.saleLost .progress::-moz-progress-bar {
     background-color: #ef5350;
+}
+
+.item.saleLost {
+    --pipeline-button-bg: #f5d1d0;
+    --pipeline-button-hover-bg: #ebb7b5;
+    --pipeline-button-border: #d38986;
+    --pipeline-button-text: #7f1d1d;
+    --pipeline-divider-color: #d38986;
 }
 
 .item.noOptionOrLeftBid .progress {
@@ -371,6 +451,14 @@
     background-color: #fbc02d;
 }
 
+.item.noOptionOrLeftBid {
+    --pipeline-button-bg: #efe0a3;
+    --pipeline-button-hover-bg: #e1cd76;
+    --pipeline-button-border: #bfa33d;
+    --pipeline-button-text: #6e5200;
+    --pipeline-divider-color: #bfa33d;
+}
+
 .item.appointmentConfirmed .progress {
     background-color: #bbdefb;
 }
@@ -385,6 +473,14 @@
 
 .item.appointmentConfirmed .progress::-moz-progress-bar {
     background-color: #42a5f5;
+}
+
+.item.appointmentConfirmed {
+    --pipeline-button-bg: #c4dbef;
+    --pipeline-button-hover-bg: #a9cbe7;
+    --pipeline-button-border: #7eaed5;
+    --pipeline-button-text: #0d3e73;
+    --pipeline-divider-color: #7eaed5;
 }
 
 

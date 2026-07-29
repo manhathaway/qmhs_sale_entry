@@ -44,6 +44,21 @@ const getLeadSource = (lead) => lead['Lead Source'] || '';
 const getSalesRep = (lead) => lead['Sales Rep Assigned'] || '';
 const getContractDate = (lead) => lead['Sale Date'] || lead['Appointment Date'] || '';
 
+const formatContactName = (name) => {
+    const normalized = String(name || '').trim();
+
+    if (!normalized) return '';
+    if (normalized.includes(',')) return normalized;
+
+    const parts = normalized.split(/\s+/).filter(Boolean);
+    if (parts.length < 2) return normalized;
+
+    const lastName = parts.pop();
+    const firstName = parts.join(' ');
+
+    return `${lastName}, ${firstName}`;
+};
+
 const mapSalesman = (salesRep) => {
     const rep = salesRep.toLowerCase();
 
@@ -164,7 +179,7 @@ export const buildSaleEntryPrefill = (lead) => {
 
     const prefill = {
         ...base,
-        name: lead.contactName || '',
+        name: formatContactName(lead.contactName || lead.ContactMetaData?.Name || ''),
         salesman: mapSalesman(getSalesRep(lead)),
         contract_date: normalizeDate(getContractDate(lead)),
         price: saleAmount ? formatCurrency(saleAmount) : '',

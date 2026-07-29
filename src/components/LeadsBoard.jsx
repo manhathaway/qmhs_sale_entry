@@ -115,7 +115,23 @@ export default function LeadsBoard({ onLeadSelect }) {
 
     const handleLeadClick = (lead) => {
         if (!canTransferLeadToSaleEntry(lead) || !onLeadSelect) return;
-        onLeadSelect(buildSaleEntryPrefill(lead, items));
+        onLeadSelect(buildSaleEntryPrefill(lead));
+    };
+
+    const handleContactClick = (lead, event) => {
+        event.stopPropagation();
+
+        const contactId = lead.contactId || lead.ContactId;
+        if (!contactId) return;
+
+        window.open(`https://account.lessannoyingcrm.com/app/View_Contact?ContactId=${contactId}`, '_blank', 'noopener,noreferrer');
+    };
+
+    const handleTransferClick = (lead, event) => {
+        event.stopPropagation();
+
+        if (!canTransferLeadToSaleEntry(lead) || !onLeadSelect) return;
+        onLeadSelect(buildSaleEntryPrefill(lead));
     };
 
     return (
@@ -270,11 +286,37 @@ export default function LeadsBoard({ onLeadSelect }) {
                                         </div>
                                     </div>
 
-                                    {/* Date on bottom right */}
-                                    {item['Appointment Date'] && <div className={styles.date}>{item['Appointment Date']}</div>}
+                                    <div className={styles.itemFooter}>
+                                        <div className={styles.footerLeft}>
+                                            {item.StatusMetaData && <div className={styles.status}>{statusName}</div>}
+                                        </div>
 
-                                    {/* Status centered at bottom */}
-                                    {item.StatusMetaData && <div className={styles.status}>{statusName}</div>}
+                                        <div className={styles.footerRight}>
+                                            {item['Appointment Date'] && <div className={styles.date}>{item['Appointment Date']}</div>}
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.actions}>
+                                        <button
+                                            type="button"
+                                            className={`${styles.actionButtonSecondary} ${statusClass}`}
+                                            onClick={(event) => handleContactClick(item, event)}
+                                            disabled={!item.contactId && !item.ContactId}
+                                            title={item.contactId || item.ContactId ? 'Open contact page' : 'Missing contact id'}
+                                        >
+                                            View Contact
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className={`${styles.actionButtonPrimary} ${statusClass}`}
+                                            onClick={(event) => handleTransferClick(item, event)}
+                                            disabled={!canTransfer || !onLeadSelect}
+                                            title={canTransfer ? 'Copy data to Sale Entry' : 'Only Sale Won and Cancelled pipelines can transfer'}
+                                        >
+                                            Copy Data
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}
