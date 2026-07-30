@@ -22,6 +22,7 @@ const buildApiUrl = (path) => `${API_BASE_URL}${path}`;
 export default function AuthGate({ children }) {
     const [checkingAuth, setCheckingAuth] = useState(true);
     const [authenticated, setAuthenticated] = useState(false);
+    const [currentUser, setCurrentUser] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -40,9 +41,11 @@ export default function AuthGate({ children }) {
             }
 
             setAuthenticated(!!data.authenticated);
+            setCurrentUser(data.user?.username || '');
         } catch (err) {
             console.error(err);
             setAuthenticated(false);
+            setCurrentUser('');
         } finally {
             setCheckingAuth(false);
         }
@@ -78,6 +81,7 @@ export default function AuthGate({ children }) {
             }
 
             setAuthenticated(true);
+            setCurrentUser(data.user?.username || username.trim());
             setPassword('');
         } catch (err) {
             setError(err.message || 'Unable to sign in');
@@ -94,6 +98,7 @@ export default function AuthGate({ children }) {
             });
         } finally {
             setAuthenticated(false);
+            setCurrentUser('');
             setUsername('');
             setPassword('');
         }
@@ -142,9 +147,13 @@ export default function AuthGate({ children }) {
     return (
         <div>
             <div className={styles.sessionBar}>
-                <button className={styles.logoutButton} type="button" onClick={handleLogout}>
-                    Log Out
-                </button>
+                <div className={styles.sessionTitle}>QMHS Tools</div>
+                <div className={styles.sessionRight}>
+                    <span className={styles.sessionUsername}>{currentUser || username}</span>
+                    <button className={styles.logoutButton} type="button" onClick={handleLogout}>
+                        Log Out
+                    </button>
+                </div>
             </div>
             {children}
         </div>

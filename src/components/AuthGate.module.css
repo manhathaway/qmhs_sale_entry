@@ -8,12 +8,16 @@
 }
 
 .loginPage {
-    min-height: 100vh;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #f2f7fb 0%, #dfeaf5 100%);
     padding: 24px;
+    overflow-y: auto;
 }
 
 .loginCard {
@@ -84,10 +88,28 @@
 
 .sessionBar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     padding: 8px 16px;
     background: #eef4fa;
     border-bottom: 1px solid #d4e0eb;
+}
+
+.sessionTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #133652;
+}
+
+.sessionRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sessionUsername {
+    font-size: 13px;
+    color: #2d4b69;
 }
 
 .logoutButton {
