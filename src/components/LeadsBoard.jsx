@@ -3,9 +3,18 @@ import { getEventPipelinesForDate } from '../services/lacrmApi';
 import { buildSaleEntryPrefill, canTransferLeadToSaleEntry, getStatusShortName } from '../leadTransfer';
 import styles from './LeadsBoard.module.css';
 
+const getTodayLocalDate = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
 export default function LeadsBoard({ onLeadSelect }) {
     const pipelineId = '3533819624848357990560426858357'; // Fixed pipeline ID
-    const [startDate, setStartDate] = useState('2026-07-24');
+    const [startDate, setStartDate] = useState(getTodayLocalDate());
     const [endDate, setEndDate] = useState('');
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -124,7 +133,11 @@ export default function LeadsBoard({ onLeadSelect }) {
         const contactId = lead.contactId || lead.ContactId;
         if (!contactId) return;
 
-        window.open(`https://account.lessannoyingcrm.com/app/View_Contact?ContactId=${contactId}`, '_blank', 'noopener,noreferrer');
+        window.open(
+            `https://account.lessannoyingcrm.com/app/View_Contact?ContactId=${contactId}`,
+            `lacrm-contact-${contactId}`,
+            'popup=yes,width=1200,height=850,left=120,top=80,resizable=yes,scrollbars=yes'
+        );
     };
 
     const handleTransferClick = (lead, event) => {
@@ -132,6 +145,18 @@ export default function LeadsBoard({ onLeadSelect }) {
 
         if (!canTransferLeadToSaleEntry(lead) || !onLeadSelect) return;
         onLeadSelect(buildSaleEntryPrefill(lead));
+    };
+
+    const formatTimeForRange = (value) => {
+        if (!value) return '';
+
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+        });
     };
 
     return (
@@ -270,6 +295,11 @@ export default function LeadsBoard({ onLeadSelect }) {
                                     tabIndex={canTransfer ? 0 : undefined}
                                     title={canTransfer ? 'Click to load into Sale Entry' : undefined}
                                 >
+                                    {(item.eventStartTime || item.eventEndTime) && (
+                                        <div className={styles.progressDateRange}>
+                                            {`${formatTimeForRange(item.eventStartTime) || '-'} - ${formatTimeForRange(item.eventEndTime) || '-'}`}
+                                        </div>
+                                    )}
                                     <progress className={styles.progress} value={progressValue} max="100"></progress>
 
                                     <div className={styles.itemContent}>
