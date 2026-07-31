@@ -122,9 +122,46 @@ export default function LeadsBoard({ onLeadSelect }) {
         );
     };
 
-    const handleLeadClick = (lead) => {
+    const deriveCountsFromItems = (lead) => {
+        const contactId = lead.contactId || lead.ContactId;
+        const contactItems = contactId
+            ? items.filter((item) => String(item.contactId || item.ContactId || '') === String(contactId))
+            : items.filter((item) => String(item.contactName || '').trim() === String(lead.contactName || '').trim());
+
+        const uniquePipelineIds = new Set();
+        const uniqueSoldPipelineIds = new Set();
+
+        contactItems.forEach((item) => {
+            const itemId = item.PipelineItemId || `${item['Appointment Date'] || ''}-${item['Sale Date'] || ''}-${item.contactId || ''}`;
+            uniquePipelineIds.add(itemId);
+
+            if (getStatusShortName(item) === 'Sale Won') {
+                uniqueSoldPipelineIds.add(itemId);
+            }
+        });
+
+        return {
+            contactPipelineCount: Number(uniquePipelineIds.size) || 0,
+            contactSoldPipelineCount: Number(uniqueSoldPipelineIds.size) || 0,
+        };
+    };
+
+    const transferLead = (lead) => {
         if (!canTransferLeadToSaleEntry(lead) || !onLeadSelect) return;
-        onLeadSelect(buildSaleEntryPrefill(lead));
+
+        const fallbackCounts = deriveCountsFromItems(lead);
+        const leadWithCounts = {
+            ...lead,
+            contactPipelineCount: Number(lead.contactPipelineCount ?? fallbackCounts.contactPipelineCount) || 0,
+            contactSoldPipelineCount: Number(lead.contactSoldPipelineCount ?? fallbackCounts.contactSoldPipelineCount) || 0,
+        };
+
+        const prefillData = buildSaleEntryPrefill(leadWithCounts);
+        onLeadSelect(prefillData);
+    };
+
+    const handleLeadClick = (lead) => {
+        transferLead(lead);
     };
 
     const handleContactClick = (lead, event) => {
@@ -142,9 +179,7 @@ export default function LeadsBoard({ onLeadSelect }) {
 
     const handleTransferClick = (lead, event) => {
         event.stopPropagation();
-
-        if (!canTransferLeadToSaleEntry(lead) || !onLeadSelect) return;
-        onLeadSelect(buildSaleEntryPrefill(lead));
+        transferLead(lead);
     };
 
     const formatTimeForRange = (value) => {

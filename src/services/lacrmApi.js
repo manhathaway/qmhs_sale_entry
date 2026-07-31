@@ -17,13 +17,63 @@ const PIPELINE_ITEM_FIELDS = [
     'Approved Amount',
     'Lead Type',
     'Lead Source',
+    'Description of Work',
+    'Address',
+    'City, State & Zip',
+    'Phone #',
     'PipelineItemId',
     'ContactId',
     'eventStartTime',
     'eventEndTime',
     'contactName',
-    'contactId'
+    'contactId',
+    'contactPipelineCount',
+    'contactSoldPipelineCount'
 ];
+
+const getStatusName = (item) => {
+    if (item?.StatusMetaData && typeof item.StatusMetaData === 'object') {
+        return item.StatusMetaData.Name || '';
+    }
+
+    return item?.StatusMetaData || '';
+};
+
+const isSoldPipelineItem = (item) => {
+    const statusName = String(getStatusName(item)).toLowerCase();
+    return statusName.includes('sale won');
+};
+
+const extractDescriptionOfWorkFromItem = (item) => {
+    if (!item || typeof item !== 'object') return '';
+
+    const normalize = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const direct = item['Description of Work'];
+
+    if (typeof direct === 'string' && direct.trim()) {
+        return direct.trim();
+    }
+
+    for (const [key, value] of Object.entries(item)) {
+        const normalizedKey = normalize(key);
+        if (!normalizedKey.includes('description') || !normalizedKey.includes('work')) {
+            continue;
+        }
+
+        if (typeof value === 'string' && value.trim()) {
+            return value.trim();
+        }
+
+        if (value && typeof value === 'object') {
+            const candidate = value.Name || value.Value || value.value || value.name;
+            if (typeof candidate === 'string' && candidate.trim()) {
+                return candidate.trim();
+            }
+        }
+    }
+
+    return '';
+};
 
 /**
  * Make a request to the LACRM API
@@ -97,6 +147,12 @@ export function filterPipelineItems(items) {
                 }
             }
         });
+
+        const descriptionOfWork = extractDescriptionOfWorkFromItem(item);
+        if (descriptionOfWork) {
+            filtered['Description of Work'] = descriptionOfWork;
+        }
+
         return filtered;
     });
 }
@@ -172,8 +228,31 @@ export async function getEventPipelinesForDate(pipelineId, startDate, endDate) {
                 ContactId: event.contactId,
             });
 
-            // Result is an array of objects with PipelineId and PipelineItems
-            (result || []).forEach(pipelineGroup => {
+            const pipelineGroups = (result || []).filter(
+                (pipelineGroup) => String(pipelineGroup.PipelineId) === String(pipelineId)
+            );
+
+            const allContactPipelineItems = pipelineGroups.flatMap(
+                (pipelineGroup) => pipelineGroup.PipelineItems || []
+            );
+
+            const uniquePipelineIds = new Set();
+            const uniqueSoldPipelineIds = new Set();
+
+            allContactPipelineItems.forEach((pipelineItem) => {
+                const itemId = pipelineItem.PipelineItemId || `${pipelineItem.PipelineId || 'pipeline'}-${pipelineItem['Appointment Date'] || ''}-${pipelineItem['Sale Date'] || ''}`;
+                uniquePipelineIds.add(itemId);
+
+                if (isSoldPipelineItem(pipelineItem)) {
+                    uniqueSoldPipelineIds.add(itemId);
+                }
+            });
+
+            const contactPipelineCount = Number(uniquePipelineIds.size) || 0;
+            const contactSoldPipelineCount = Number(uniqueSoldPipelineIds.size) || 0;
+
+            // Result is filtered to the active pipeline only.
+            pipelineGroups.forEach(pipelineGroup => {
                 const pipelineItems = pipelineGroup.PipelineItems || [];
 
                 // Filter by appointment date within the range
@@ -192,8 +271,11 @@ export async function getEventPipelinesForDate(pipelineId, startDate, endDate) {
                             ...item,
                             contactName: event.name,
                             contactId: event.contactId,
+                            ContactId: event.contactId,
                             eventStartTime: event.eventStartTime,
                             eventEndTime: event.eventEndTime,
+                            contactPipelineCount,
+                            contactSoldPipelineCount,
                         });
                     }
                 });

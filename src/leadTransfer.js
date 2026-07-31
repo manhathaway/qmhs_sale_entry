@@ -1,5 +1,5 @@
 import { buildInitialState, formatCurrency } from './formHelpers';
-import { FORM_SCHEMA, SALESMEN, SOURCES, DEPOSIT_TYPES } from './data';
+import { FORM_SCHEMA, SALESMEN, SOURCES, DEPOSIT_TYPES, AZ_CITIES } from './data';
 
 const TRANSFERABLE_STATUSES = ['Sale Won', 'Cancelled'];
 const ZERO_CURRENCY = '$0';
@@ -44,6 +44,117 @@ const getLeadSource = (lead) => lead['Lead Source'] || '';
 const getSalesRep = (lead) => lead['Sales Rep Assigned'] || '';
 const getContractDate = (lead) => lead['Sale Date'] || lead['Appointment Date'] || '';
 
+const getDescriptionOfWork = (lead) => {
+    const candidateValues = [
+        lead['Description of Work'],
+        lead['Description Of Work'],
+        lead['description of work'],
+        lead.descriptionofwork,
+        lead.descriptionOfWork,
+        lead.DescriptionOfWork,
+    ];
+
+    for (const candidate of candidateValues) {
+        if (!candidate) continue;
+
+        if (typeof candidate === 'string') {
+            const value = candidate.trim();
+            if (value) return value;
+            continue;
+        }
+
+        if (typeof candidate === 'object') {
+            const value = (candidate.Name || candidate.Value || candidate.value || candidate.name || '').trim();
+            if (value) return value;
+        }
+    }
+
+    return '';
+};
+
+const getCityStateZipText = (lead) => {
+    const candidateValues = [
+        lead['City, State & Zip'],
+        lead['City, State, & Zip'],
+        lead['City, State, Zip'],
+        lead.CityStateZip,
+        lead.cityStateZip,
+    ];
+
+    for (const candidate of candidateValues) {
+        if (!candidate) continue;
+
+        if (typeof candidate === 'string') {
+            return candidate;
+        }
+
+        if (typeof candidate === 'object') {
+            return candidate.Name || candidate.Value || candidate.value || candidate.name || '';
+        }
+    }
+
+    return '';
+};
+
+const mapAzCityFromLead = (lead, salesmanValue) => {
+    const salesman = SALESMEN.list.find((option) => option.value === salesmanValue);
+
+    if (!salesman || salesman.region !== 'AZ') {
+        return '';
+    }
+
+    const cityStateZip = String(getCityStateZipText(lead) || '').trim();
+    if (!cityStateZip) return '';
+
+    const beforeComma = cityStateZip.split(',')[0]?.trim() || '';
+    if (!beforeComma) return '';
+
+    const normalize = (value) => String(value || '').toLowerCase().trim();
+    const normalizedBeforeComma = normalize(beforeComma);
+
+    const exactMatch = AZ_CITIES.list.find((option) => {
+        const optionName = normalize(option.name);
+        const optionValue = normalize(option.value);
+        return optionName === normalizedBeforeComma || optionValue === normalizedBeforeComma;
+    });
+
+    if (exactMatch?.value) return exactMatch.value;
+
+    // Fallback: first word before comma when CRM city label is noisy.
+    const firstWord = normalizedBeforeComma.split(/\s+/)[0];
+    const firstWordMatch = AZ_CITIES.list.find((option) => {
+        const optionName = normalize(option.name);
+        const optionValue = normalize(option.value);
+        return optionName === firstWord || optionValue === firstWord;
+    });
+
+    return firstWordMatch?.value || '';
+};
+
+const formatContactNameFirstLast = (name) => {
+    const normalized = String(name || '').trim();
+
+    if (!normalized) return '';
+
+    if (normalized.includes(',')) {
+        const [lastName, firstName] = normalized.split(',').map((part) => part.trim());
+        return [firstName, lastName].filter(Boolean).join(' ');
+    }
+
+    return normalized;
+};
+
+const buildAddressText = (lead) => {
+    const displayName = formatContactNameFirstLast(lead.contactName || lead.ContactMetaData?.Name || '');
+    const address = String(lead['Address'] || '').trim();
+    const cityStateZip = String(lead['City, State & Zip'] || '').trim();
+    const phone = String(lead['Phone #'] || '').trim();
+
+    return [displayName, address, cityStateZip, phone]
+        .filter(Boolean)
+        .join('\n');
+};
+
 const formatContactName = (name) => {
     const normalized = String(name || '').trim();
 
@@ -60,12 +171,20 @@ const formatContactName = (name) => {
 };
 
 const mapSalesman = (salesRep) => {
-    const rep = salesRep.toLowerCase();
+    const rep = String(salesRep || '').toLowerCase().replace(/[().]/g, '').trim();
+
+    // Explicit disambiguation for reps sharing the same first name.
+    if (rep.includes('nick m') || rep.includes('mackenzie')) return 'NickM';
+    if (rep.includes('nick b') || rep.includes('bennett')) return 'NB';
 
     const match = SALESMEN.list.find(option => {
-        const name = (option.name || '').toLowerCase();
+        const name = (option.name || '').toLowerCase().replace(/[().]/g, '').trim();
         const value = (option.value || '').toLowerCase();
-        return name && (rep.includes(name.replace(/[().]/g, '').trim()) || rep.includes(name.split(' ')[0])) || (value && rep.includes(value));
+
+        if (!name && !value) return false;
+
+        // Prefer exact/full-name style matches and value matches.
+        return (name && rep.includes(name)) || (value && rep.includes(value));
     });
 
     if (match?.value) return match.value;
@@ -75,7 +194,7 @@ const mapSalesman = (salesRep) => {
     if (rep.includes('dom')) return rep.includes('az') ? 'DC' : 'Dom';
     if (rep.includes('dave')) return 'Dave';
     if (rep.includes('nick m')) return 'NickM';
-    if (rep.includes('nick') && rep.includes('b')) return 'NB';
+    if (rep.includes('nick b')) return 'NB';
     if (rep.includes('chris')) return 'CHP';
 
     return '';
@@ -139,17 +258,83 @@ const parseDepositAmount = (depositAmount) => {
     return formatCurrency(numericValue);
 };
 
+const normalizeText = (value) => String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const scoreSourceMatch = (candidate, target) => {
+    const normalizedCandidate = normalizeText(candidate);
+    const normalizedTarget = normalizeText(target);
+
+    if (!normalizedCandidate || !normalizedTarget) return 0;
+    if (normalizedCandidate === normalizedTarget) return 100;
+    if (normalizedCandidate.includes(normalizedTarget) || normalizedTarget.includes(normalizedCandidate)) return 85;
+
+    const candidateTokens = normalizedCandidate.split(' ');
+    const targetTokens = normalizedTarget.split(' ');
+    const tokenOverlap = targetTokens.filter((token) => candidateTokens.includes(token)).length;
+
+    if (tokenOverlap === 0) return 0;
+    return Math.round((tokenOverlap / Math.max(candidateTokens.length, targetTokens.length)) * 70);
+};
+
+const parseCount = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+const shouldMarkAsNewCustomer = (lead) => {
+    const soldCount = parseCount(lead.contactSoldPipelineCount);
+
+    if (soldCount !== null) {
+        // First sold pipeline for the contact => treat as new customer.
+        return soldCount <= 1;
+    }
+
+    const totalCount = parseCount(lead.contactPipelineCount);
+    if (totalCount !== null) {
+        return totalCount <= 1;
+    }
+
+    return false;
+};
+
 const mapSource = (lead) => {
     const leadType = getLeadType(lead);
     const leadSource = getLeadSource(lead);
     const csr = (lead['Customer Service Representative'] || '').trim();
+    const normalizedLeadSource = normalizeText(leadSource);
 
     if (leadType === 'Upsale') return 'Upsale';
     if (leadType === 'Go-Back' || leadType === 'Go Back') return 'Go Back';
 
     if (leadType === 'Call In') {
-        const callInMatch = SOURCES.list.find(option => option.type === 'CI' && option.name === leadSource);
-        return callInMatch?.value || '';
+        let bestCallInMatch = null;
+        let bestCallInScore = 0;
+
+        SOURCES.list
+            .filter((option) => option.type === 'CI')
+            .forEach((option) => {
+                const score = Math.max(
+                    scoreSourceMatch(option.name, leadSource),
+                    scoreSourceMatch(option.value, leadSource)
+                );
+
+                if (score > bestCallInScore) {
+                    bestCallInScore = score;
+                    bestCallInMatch = option;
+                }
+            });
+
+        // Common shorthand normalization for web leads.
+        if (normalizedLeadSource.includes('web') && normalizedLeadSource.includes('ad')) {
+            const webOption = SOURCES.list.find((option) => option.type === 'CI' && normalizeText(option.name).includes('web'));
+            if (webOption?.value) return webOption.value;
+        }
+
+        return bestCallInScore >= 45 ? bestCallInMatch?.value || '' : '';
     }
 
     if (leadType === 'Quality Check' || leadType === 'Warranty Check') {
@@ -157,8 +342,27 @@ const mapSource = (lead) => {
         if (wcMatch?.value) return wcMatch.value;
     }
 
-    const directMatch = SOURCES.list.find(option => option.name === leadSource || option.value === leadSource);
-    return directMatch?.value || '';
+    let bestMatch = null;
+    let bestScore = 0;
+
+    SOURCES.list.forEach((option) => {
+        const score = Math.max(
+            scoreSourceMatch(option.name, leadSource),
+            scoreSourceMatch(option.value, leadSource)
+        );
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestMatch = option;
+        }
+    });
+
+    if (normalizedLeadSource.includes('web') && normalizedLeadSource.includes('ad')) {
+        const webOption = SOURCES.list.find((option) => normalizeText(option.name).includes('web'));
+        if (webOption?.value) return webOption.value;
+    }
+
+    return bestScore >= 45 ? bestMatch?.value || '' : '';
 };
 
 export const canTransferLeadToSaleEntry = (lead) => {
@@ -176,11 +380,17 @@ export const buildSaleEntryPrefill = (lead) => {
     const depositType = extractDepositType(lead);
     const normalizedDepositAmount = parseDepositAmount(depositAmount);
     const hasDeposit = String(normalizedDepositAmount) !== ZERO_CURRENCY;
+    const mappedSalesman = mapSalesman(getSalesRep(lead));
+    const descriptionOfWork = getDescriptionOfWork(lead);
 
     const prefill = {
         ...base,
         name: formatContactName(lead.contactName || lead.ContactMetaData?.Name || ''),
-        salesman: mapSalesman(getSalesRep(lead)),
+        address: buildAddressText(lead),
+        job_description: descriptionOfWork || base.job_description,
+        new_customer: shouldMarkAsNewCustomer(lead),
+        salesman: mappedSalesman,
+        city: mapAzCityFromLead(lead, mappedSalesman),
         contract_date: normalizeDate(getContractDate(lead)),
         price: saleAmount ? formatCurrency(saleAmount) : '',
         deposit: normalizedDepositAmount,
