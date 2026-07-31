@@ -145,12 +145,11 @@ const formatContactNameFirstLast = (name) => {
 };
 
 const buildAddressText = (lead) => {
-    const displayName = formatContactNameFirstLast(lead.contactName || lead.ContactMetaData?.Name || '');
     const address = String(lead['Address'] || '').trim();
     const cityStateZip = String(lead['City, State & Zip'] || '').trim();
     const phone = String(lead['Phone #'] || '').trim();
 
-    return [displayName, address, cityStateZip, phone]
+    return [address, cityStateZip, phone]
         .filter(Boolean)
         .join('\n');
 };
