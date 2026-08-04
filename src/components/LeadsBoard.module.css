@@ -180,6 +180,14 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    color: #5c7085;
+    --pipeline-button-bg: #e7edf3;
+    --pipeline-button-hover-bg: #d9e3ec;
+    --pipeline-button-border: #c1cedb;
+    --pipeline-button-text: #54697f;
+    --pipeline-divider-color: #c8d4df;
+    --pipeline-progress-bg: #edf3f7;
+    --pipeline-progress-fill: #c7d4df;
 }
 
 .clickableItem {
@@ -201,7 +209,7 @@
     margin-bottom: 10px;
     border: none;
     border-radius: 4px;
-    background-color: #d3d3d3;
+    background-color: var(--pipeline-progress-bg, #d3d3d3);
 }
 
 .progressDateRange {
@@ -251,34 +259,40 @@
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 4px;
+    color: inherit;
 }
 
 .salesRep {
     font-size: 12px;
     opacity: 0.75;
+    color: inherit;
 }
 
 .leadType {
     font-size: 13px;
     font-weight: 500;
     margin-bottom: 4px;
+    color: inherit;
 }
 
 .leadSource {
     font-size: 12px;
     opacity: 0.75;
+    color: inherit;
 }
 
 .date {
     font-size: 12px;
     text-align: right;
     opacity: 0.75;
+    color: inherit;
 }
 
 .status {
     font-size: 12px;
     text-align: left;
     font-weight: 500;
+    color: inherit;
 }
 
 .actions {
@@ -314,6 +328,14 @@
     transform: none;
 }
 
+.item:not(.saleWon):not(.saleLost):not(.noOptionOrLeftBid):not(.appointmentConfirmed) .actionButtonPrimary:disabled,
+.item:not(.saleWon):not(.saleLost):not(.noOptionOrLeftBid):not(.appointmentConfirmed) .actionButtonSecondary:disabled {
+    background-color: #e5e8ec;
+    border-color: #d0d6dd;
+    color: #8a97a5;
+    opacity: 1;
+}
+
 .actionButtonPrimary {
     background-color: var(--pipeline-button-bg, #007bff);
     color: var(--pipeline-button-text, #ffffff);
@@ -337,6 +359,17 @@
 
 .item div:last-child {
     margin-bottom: 0;
+}
+
+.item:not(.saleWon):not(.saleLost):not(.noOptionOrLeftBid):not(.appointmentConfirmed) .actionButtonPrimary {
+    background-color: color-mix(in srgb, var(--pipeline-button-bg) 86%, white);
+    color: var(--pipeline-button-text);
+    border-color: color-mix(in srgb, var(--pipeline-button-border) 85%, white);
+    opacity: 0.96;
+}
+
+.item:not(.saleWon):not(.saleLost):not(.noOptionOrLeftBid):not(.appointmentConfirmed) .actionButtonPrimary:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--pipeline-button-hover-bg) 86%, white);
 }
 
 .item.saleWon {
@@ -380,18 +413,18 @@
 }
 
 .progress::-webkit-progress-bar {
-    background-color: #d3d3d3;
+    background-color: var(--pipeline-progress-bg, #d3d3d3);
     border-radius: 4px;
     overflow: hidden;
 }
 
 .progress::-webkit-progress-value {
-    background-color: #757575;
+    background-color: var(--pipeline-progress-fill, #757575);
     border-radius: 4px;
 }
 
 .progress::-moz-progress-bar {
-    background-color: #757575;
+    background-color: var(--pipeline-progress-fill, #757575);
     border-radius: 4px;
 }
 
@@ -418,6 +451,8 @@
     --pipeline-button-border: #8abb8c;
     --pipeline-button-text: #1b4d1d;
     --pipeline-divider-color: #8abb8c;
+    --pipeline-progress-bg: #c8e6c9;
+    --pipeline-progress-fill: #66bb6a;
 }
 
 .item.saleLost .progress {
@@ -442,6 +477,8 @@
     --pipeline-button-border: #d38986;
     --pipeline-button-text: #7f1d1d;
     --pipeline-divider-color: #d38986;
+    --pipeline-progress-bg: #ffcdd2;
+    --pipeline-progress-fill: #ef5350;
 }
 
 .item.noOptionOrLeftBid .progress {
@@ -466,6 +503,8 @@
     --pipeline-button-border: #bfa33d;
     --pipeline-button-text: #6e5200;
     --pipeline-divider-color: #bfa33d;
+    --pipeline-progress-bg: #ffe082;
+    --pipeline-progress-fill: #fbc02d;
 }
 
 .item.appointmentConfirmed .progress {
@@ -490,6 +529,8 @@
     --pipeline-button-border: #7eaed5;
     --pipeline-button-text: #0d3e73;
     --pipeline-divider-color: #7eaed5;
+    --pipeline-progress-bg: #bbdefb;
+    --pipeline-progress-fill: #42a5f5;
 }
 
 

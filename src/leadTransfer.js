@@ -35,6 +35,8 @@ const getStatusShortName = (lead) => {
     if (statusName.includes('Left Bid')) return 'Left Bid';
     if (statusName.includes('Porched') || statusName.includes('No Show')) return 'Porched/No Show';
     if (statusName.includes('Appointment Confirmed')) return 'Appointment Confirmed';
+    if (statusName.includes('Called to Confirm Appt')) return 'Called to Confirm';
+    if (statusName.includes('Assigned to Sales Representative')) return 'Assigned to Sales Rep.';
 
     return statusName;
 };
