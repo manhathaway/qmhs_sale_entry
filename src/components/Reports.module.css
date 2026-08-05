@@ -71,10 +71,39 @@
     color: #2d3f53;
 }
 
+.graphTypeSelect {
+    border: 1px solid #c4ced9;
+    border-radius: 6px;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d3f53;
+    background: #fff;
+}
+
 .controls {
     display: flex;
     gap: 10px;
     align-items: center;
+}
+
+.dateLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4d647c;
+    white-space: nowrap;
+}
+
+.filterLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4d647c;
+    white-space: nowrap;
 }
 
 .controls input {
@@ -83,6 +112,16 @@
     height: 34px;
     padding: 0 10px;
     font-size: 13px;
+}
+
+.controls select {
+    border: 1px solid #c4ced9;
+    border-radius: 6px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+    background: #fff;
+    color: #2d3f53;
 }
 
 .controls button {
@@ -165,6 +204,86 @@
     padding: 8px 6px;
 }
 
+.lineChartContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lineChart {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.lineAxis {
+    stroke: #9ab0c5;
+    stroke-width: 1.5;
+}
+
+.lineGrid {
+    stroke: #dbe6f0;
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+}
+
+.lineAxisText {
+    fill: #5f748b;
+    font-size: 11px;
+}
+
+.lineSeries {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 1px 1px rgba(36, 58, 82, 0.08));
+}
+
+.lineLegend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px 12px;
+}
+
+.lineLegendItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid #d9e1ea;
+    border-radius: 8px;
+    background: #fbfdff;
+}
+
+.lineLegendKey {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.lineLegendSwatch {
+    width: 28px;
+    height: 4px;
+    border-radius: 999px;
+    flex: 0 0 auto;
+}
+
+.lineLegendLabel {
+    font-size: 13px;
+    color: #32485e;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lineLegendValue {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2d4b69;
+    white-space: nowrap;
+}
+
 .chartGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
@@ -193,13 +312,11 @@
     height: 160px;
     border: 1px solid #d0dae4;
     border-radius: 6px;
-    background: repeating-linear-gradient(
-        to top,
-        #eef3f8 0,
-        #eef3f8 18px,
-        #f8fbfe 18px,
-        #f8fbfe 36px
-    );
+    background: repeating-linear-gradient(to top,
+            #eef3f8 0,
+            #eef3f8 18px,
+            #f8fbfe 18px,
+            #f8fbfe 36px);
     display: flex;
     align-items: flex-end;
     justify-content: center;

@@ -1,6 +1,6 @@
 .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 20px;
     gap: 20px;
@@ -17,12 +17,24 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.dateLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #54697f;
+    white-space: nowrap;
 }
 
 .headerRight {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 24px;
 }
 
 .header input {
@@ -46,6 +58,21 @@
 
 .filterButton:hover {
     background-color: #e0e0e0;
+}
+
+.headerLeft button:last-child {
+    border: 1px solid #2f6fa9;
+    background: #3f83c1;
+    color: #fff;
+}
+
+.headerLeft button:last-child:hover {
+    background: #2f6fa9;
+}
+
+.headerLeft button:last-child:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .filterPanel {

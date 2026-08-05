@@ -198,26 +198,35 @@ export default function LeadsBoard({ onLeadSelect }) {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
+                <div className={styles.headerRight}>
+                    {loading && <div className={styles.spinner}></div>}
+                </div>
                 <div className={styles.headerLeft}>
+                    <label className={styles.dateLabel}>
+                        <span>From:</span>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            placeholder="Start Date"
+                        />
+                    </label>
+                    <label className={styles.dateLabel}>
+                        <span>To:</span>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            placeholder="End Date (Optional)"
+                            title="Optional - leave blank for single day"
+                        />
+                    </label>
                     <button
                         className={styles.filterButton}
                         onClick={() => setShowFilters(!showFilters)}
                     >
                         {showFilters ? 'Hide Filters' : 'Show Filters'}
                     </button>
-                    <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        placeholder="Start Date"
-                    />
-                    <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        placeholder="End Date (Optional)"
-                        title="Optional - leave blank for single day"
-                    />
                     <button
                         className={styles.filterButton}
                         type="button"
@@ -226,9 +235,6 @@ export default function LeadsBoard({ onLeadSelect }) {
                     >
                         {loading ? 'Searching...' : 'Search'}
                     </button>
-                </div>
-                <div className={styles.headerRight}>
-                    {loading && <div className={styles.spinner}></div>}
                 </div>
             </div>
 
