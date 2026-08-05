@@ -265,8 +265,8 @@ export async function getEventPipelinesForDate(pipelineId, startDate, endDate) {
                         dateToMatch = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
                     }
 
-                    // Check if date falls within the range
-                    if (dateToMatch >= startDate && dateToMatch <= endDate) {
+                    // Check if date falls within the range using an exclusive end boundary.
+                    if (dateToMatch >= startDate && dateToMatch < endDate) {
                         allPipelines.push({
                             ...item,
                             contactName: event.name,

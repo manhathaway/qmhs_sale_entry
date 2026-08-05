@@ -32,7 +32,7 @@ export default function LeadsBoard({ onLeadSelect }) {
         return () => clearInterval(interval);
     }, []);
 
-    // Fetch data automatically every 30 seconds and when date changes
+    // Fetch data for the selected date range.
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -41,52 +41,53 @@ export default function LeadsBoard({ onLeadSelect }) {
             const start = new Date(startDate);
             let end = new Date(start);
 
-            // Use custom end date if provided, otherwise default to next day
+            // UI end date is inclusive; convert to an exclusive next-day boundary.
             if (endDate) {
                 end = new Date(endDate);
+                end.setDate(end.getDate() + 1);
             } else {
                 end.setDate(end.getDate() + 1);
             }
 
             const endDateStr = end.toISOString().split('T')[0];
-            const result = await getEventPipelinesForDate(pipelineId, startDate, endDateStr);
-            setItems(result);
+
+            // For ranges, fetch day-by-day and merge unique pipeline items.
+            const isRange = Boolean(endDate);
+            if (!isRange) {
+                const result = await getEventPipelinesForDate(pipelineId, startDate, endDateStr);
+                setItems(result);
+                return;
+            }
+
+            const cursor = new Date(startDate);
+            const endBoundary = new Date(endDateStr);
+            const mergedById = new Map();
+
+            while (cursor < endBoundary) {
+                const dayStart = cursor.toISOString().split('T')[0];
+                const nextDay = new Date(cursor);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const dayEnd = nextDay.toISOString().split('T')[0];
+
+                const dayItems = await getEventPipelinesForDate(pipelineId, dayStart, dayEnd);
+
+                dayItems.forEach((item) => {
+                    const id = item.PipelineItemId || `${item['Appointment Date'] || ''}-${item['Sale Date'] || ''}-${item.contactId || item.ContactId || ''}`;
+                    if (!mergedById.has(id)) {
+                        mergedById.set(id, item);
+                    }
+                });
+
+                cursor.setDate(cursor.getDate() + 1);
+            }
+
+            setItems(Array.from(mergedById.values()));
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
     };
-
-    // Fetch data when date changes
-    useEffect(() => {
-        fetchData();
-    }, [startDate, endDate]);
-
-    // Set up auto-refresh interval based on items (only for today's date while 'Appointment Confirmed' items exist)
-    useEffect(() => {
-        // Get today's date in YYYY-MM-DD format
-        const today = new Date().toISOString().split('T')[0];
-
-        // Check if there are any 'Appointment Confirmed' items
-        const hasAppointmentConfirmed = items.some(item => {
-            const statusName = item.StatusMetaData && typeof item.StatusMetaData === 'object'
-                ? item.StatusMetaData.Name
-                : item.StatusMetaData;
-
-            return statusName === 'Appointment Confirmed';
-        });
-
-        // Set up interval for auto-refresh (30 seconds) only if viewing today AND there are 'Appointment Confirmed' items
-        let interval = null;
-        if (startDate === today && hasAppointmentConfirmed && !endDate) {
-            interval = setInterval(fetchData, 30000);
-        }
-
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [startDate, endDate, items]);
 
     // Get unique statuses and sales reps for filter options
     const uniqueStatuses = [...new Set(items.map(item => {
@@ -198,6 +199,12 @@ export default function LeadsBoard({ onLeadSelect }) {
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
+                    <button
+                        className={styles.filterButton}
+                        onClick={() => setShowFilters(!showFilters)}
+                    >
+                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                    </button>
                     <input
                         type="date"
                         value={startDate}
@@ -213,9 +220,11 @@ export default function LeadsBoard({ onLeadSelect }) {
                     />
                     <button
                         className={styles.filterButton}
-                        onClick={() => setShowFilters(!showFilters)}
+                        type="button"
+                        onClick={fetchData}
+                        disabled={loading}
                     >
-                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                        {loading ? 'Searching...' : 'Search'}
                     </button>
                 </div>
                 <div className={styles.headerRight}>

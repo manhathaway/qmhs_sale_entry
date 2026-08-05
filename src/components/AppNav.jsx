@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Header from './Header.jsx';
 import Form from './Form.jsx';
 import LeadsBoard from './LeadsBoard.jsx';
+import Reports from './Reports.jsx';
 import styles from './AppNav.module.css';
 
 export default function AppNav() {
@@ -32,6 +32,12 @@ export default function AppNav() {
                 >
                     Leads Board
                 </button>
+                <button
+                    className={`${styles.tab} ${activeTab === 'reports' ? styles.active : ''}`}
+                    onClick={() => setActiveTab('reports')}
+                >
+                    Reports
+                </button>
             </div>
 
             <div className={styles.tabContent}>
@@ -40,6 +46,9 @@ export default function AppNav() {
                 </div>
                 <div className={`${styles.tabPanel} ${activeTab === 'leadsBoard' ? styles.visible : ''}`}>
                     <LeadsBoard onLeadSelect={handleLeadSelect} />
+                </div>
+                <div className={`${styles.tabPanel} ${activeTab === 'reports' ? styles.visible : ''}`}>
+                    <Reports />
                 </div>
             </div>
         </div>
